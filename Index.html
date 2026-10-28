@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Velora Positioning Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lab bench — controls rail on the left, perceptual map as the instrument on the right; stacks on phones */
+:root{
+  --bg:#f5f3f8; --surface:#ffffff; --sunk:#ece8f2; --ink:#1e1a2e; --muted:#665f7a; --line:#dfd9e8;
+  --accent:#b4235f; --accent-soft:#f7e3ec; --natural:#2f7d5b; --science:#2f5fa8; --gold:#a8791f;
+  --good:#1f7a4d; --good-soft:#e2f2e9; --warn:#a85d12; --warn-soft:#f8ead9; --bad:#b3261e; --bad-soft:#f8e1df;
+  --f-display:"Young Serif", Georgia, "Times New Roman", serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#14111b; --surface:#1d1928; --sunk:#262036; --ink:#eeeaf5; --muted:#a69fb8; --line:#342d45;
+  --accent:#ee6a9f; --accent-soft:#3a1a2a; --natural:#62c597; --science:#82a9ec; --gold:#e0b35a;
+  --good:#5fd197; --good-soft:#163024; --warn:#f0a65a; --warn-soft:#352614; --bad:#f2837a; --bad-soft:#3a1a18;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#14111b; --surface:#1d1928; --sunk:#262036; --ink:#eeeaf5; --muted:#a69fb8; --line:#342d45;
+  --accent:#ee6a9f; --accent-soft:#3a1a2a; --natural:#62c597; --science:#82a9ec; --gold:#e0b35a;
+  --good:#5fd197; --good-soft:#163024; --warn:#f0a65a; --warn-soft:#352614; --bad:#f2837a; --bad-soft:#3a1a18;
+  color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(1.7rem,3.6vw,2.4rem)}
+h2{font-size:1.45rem}
+h3{font-size:1.1rem}
+p{margin:0}
+.eyebrow{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between}
+header.top .lede{max-width:62ch;color:var(--muted);margin-top:6px}
+nav.steps{display:flex;gap:6px;background:var(--sunk);padding:4px;border-radius:12px}
+nav.steps a{display:flex;flex-direction:column;padding:8px 14px;border-radius:9px;text-decoration:none;color:var(--muted);min-width:0}
+nav.steps a b{font-weight:600;color:var(--ink);font-size:.95rem}
+nav.steps a small{font-size:.75rem}
+nav.steps a[aria-current="page"]{background:var(--surface);box-shadow:0 1px 3px rgba(20,10,40,.12)}
+nav.steps a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.bench{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:860px){.bench{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.instrument{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 12px)}
+@media (max-width:860px){.instrument{position:static}}
+
+.missions{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:.86rem;padding:6px 11px;border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.brief{background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.brief .eyebrow{color:var(--accent)}
+.brief p{font-size:.92rem}
+
+.pgroup{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.pgroup:first-of-type{border-top:0;padding-top:0}
+.ptag{font-family:var(--f-display);font-size:1rem;display:flex;align-items:baseline;gap:8px}
+.ptag span{font-family:var(--f-body);font-size:.75rem;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.82rem;font-weight:600;color:var(--muted)}
+select{font:inherit;font-size:.92rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+select:disabled{opacity:.7}
+.field.changed select{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.pricerow{display:flex;align-items:center;gap:12px}
+.pricerow input{flex:1;accent-color:var(--accent)}
+.pricerow output{font-family:var(--f-mono);font-size:.88rem;min-width:7ch;text-align:right;font-variant-numeric:tabular-nums}
+
+.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 16px;cursor:pointer;background:var(--accent);color:#fff}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.note{font-size:.82rem;color:var(--muted)}
+.dirty{font-size:.82rem;color:var(--warn);font-weight:600}
+
+.maphead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.86rem;color:var(--muted);cursor:pointer}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+.mapbox{width:100%;max-width:640px;margin:0 auto}
+svg.map{width:100%;height:auto;display:block}
+svg.map text{font-family:var(--f-body);fill:var(--muted)}
+.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.readouts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ro{background:var(--sunk);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ro small{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ro b{font-family:var(--f-mono);font-size:1.05rem;font-variant-numeric:tabular-nums;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+.debrief{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px}
+.debrief ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:8px}
+.debrief li{max-width:65ch}
+details.fac{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:14px 18px}
+details.fac summary{cursor:pointer;font-weight:600}
+details.fac .body{display:flex;flex-direction:column;gap:10px;margin-top:12px;max-width:75ch;font-size:.92rem}
+details.fac ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+
+/* Part 2 */
+.cases{display:flex;flex-wrap:wrap;gap:6px}
+.statement{border-left:3px solid var(--accent);padding:4px 0 4px 12px;font-family:var(--f-display);font-size:1.02rem;line-height:1.35}
+.stage{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.stage .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--sunk);color:var(--ink);font-family:var(--f-mono)}
+.stage.on .n{background:var(--accent);color:#fff}
+.mixlist{display:flex;flex-direction:column;gap:6px}
+.mixrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;border-radius:9px;background:var(--bg);border:1px solid var(--line)}
+.mixrow input[type=checkbox]{accent-color:var(--accent);width:17px;height:17px}
+.mixrow .lv{font-size:.76rem;color:var(--muted);font-weight:600}
+.mixrow .op{font-size:.9rem}
+.mixrow.suspect{border-color:var(--accent);background:var(--accent-soft)}
+.verdict{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.verdict.hit{background:var(--good-soft);color:var(--good)}
+.verdict.miss{background:var(--bad-soft);color:var(--bad)}
+.verdict.false{background:var(--warn-soft);color:var(--warn)}
+.verdict.ok{background:var(--sunk);color:var(--muted)}
+.feedback{border-radius:10px;padding:12px 14px;font-size:.9rem;display:flex;flex-direction:column;gap:6px}
+.feedback.good{background:var(--good-soft)}
+.feedback.warn{background:var(--warn-soft)}
+.feedback b{font-weight:700}
+.counter{font-family:var(--f-mono);font-size:.85rem}
+@media (prefers-reduced-motion: no-preference){
+  svg.map .dot{transition:cx .5s ease, cy .5s ease}
+  svg.map .centroid{transition:cx .5s ease, cy .5s ease}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Marketing &amp; Customer Centricity · Positioning simulation</div>
+      <h1>Velora Positioning Lab</h1>
+      <p class="lede">You launch Velora, a new shampoo for the Indian market. You cannot choose where shoppers put your brand. You can only choose the marketing mix, and let 80 shoppers decide what it means.</p>
+    </div>
+    <div class="btnrow">
+      <span class="pill" id="stepnow">Part 1 of 2 · Build</span>
+    <button class="btn ghost" id="resetAll" type="button">↺ Restart simulation</button>
+    </div>
+  </header>
+
+  <!-- ================= PART 1 ================= -->
+  <section id="view-build" class="wrap" style="gap:22px">
+    <div class="bench">
+      <div class="panel">
+        <div class="field">
+          <div class="eyebrow">Your brief</div>
+          <div class="missions" id="missions"></div>
+        </div>
+        <div class="brief" id="brief"></div>
+        <div id="controls1"></div>
+        <div class="btnrow">
+          <button class="btn" id="run1">Run consumer panel</button>
+          <span class="dirty" id="dirty1" hidden>Mix changed since last panel</span>
+        </div>
+        <p class="note" id="runs1">Panel runs on this brief: 0</p>
+      </div>
+
+      <div class="panel instrument">
+        <div class="maphead">
+          <h2>Perceptual map</h2>
+          <label class="toggle"><input type="checkbox" id="sig1"> Show what each lever signals</label>
+        </div>
+        <div class="mapbox"><svg class="map" id="map1" viewBox="0 0 560 560" role="img" aria-label="Perceptual map of the shampoo market"></svg></div>
+        <div class="legend" id="legend1"></div>
+        <div class="readouts" id="ro1"></div>
+        <div id="status1"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow">Debrief · Part 1</div>
+      <div class="debrief">
+        <div>
+          <h3 style="margin-bottom:10px">Discuss in your team</h3>
+          <ol>
+            <li>Which single lever moved Velora the most along the premium axis? Why do shoppers read it so strongly?</li>
+            <li>Which brief was hardest to reach, and which lever was in the way?</li>
+            <li>You could not type in a position. What does that tell you about a positioning statement written in a strategy deck?</li>
+          </ol>
+        </div>
+        <div>
+          <h3 style="margin-bottom:10px">Look closer</h3>
+          <ol>
+            <li>Turn on the lever signals. Which levers pull against each other in your final mix?</li>
+            <li>Why are the 80 dots not all in one place, even when every lever points the same way?</li>
+            <li>How many panel runs did you need? What would each run cost a real brand?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="btnrow" style="justify-content:flex-end">
+      <button class="btn" id="toPart2" type="button">Continue to Part 2 · Diagnose →</button>
+    </div>
+  </section>
+
+  <!-- ================= PART 2 ================= -->
+  <section id="view-diagnose" class="wrap" style="gap:22px" hidden>
+    <div class="bench">
+      <div class="panel">
+        <div class="field">
+          <div class="eyebrow">Brand file</div>
+          <div class="cases" id="cases"></div>
+        </div>
+        <div id="casehead"></div>
+        <div id="casebody"></div>
+      </div>
+
+      <div class="panel instrument">
+        <div class="maphead">
+          <h2 id="map2title">What shoppers see</h2>
+          <span id="pill2"></span>
+        </div>
+        <div class="mapbox"><svg class="map" id="map2" viewBox="0 0 560 560" role="img" aria-label="Perceptual map for the case brand"></svg></div>
+        <div class="legend" id="legend2"></div>
+        <div class="readouts" id="ro2"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow">Debrief · Part 2</div>
+      <div class="debrief">
+        <div>
+          <h3 style="margin-bottom:10px">Read the cloud</h3>
+          <ol>
+            <li>Amrit Roots and DermaPure both have a tall cloud. Glossé has a wide one. What does the shape tell you about which axis is confused?</li>
+            <li>Which culprits were easiest to spot from the mix alone? Which only showed up on the map?</li>
+            <li>A blurred brand sits close to the middle of the map. Why is the middle a dangerous place in a crowded category?</li>
+          </ol>
+        </div>
+        <div>
+          <h3 style="margin-bottom:10px">Back to the real world</h3>
+          <ol>
+            <li>Who inside a company usually owns each culprit lever (sales, trade marketing, agency, R&amp;D)? Why do incoherent mixes happen?</li>
+            <li>Sachets and kirana reach are vital in India. How could a premium brand use them without blurring its position?</li>
+            <li>Name a real haircare brand whose mix sends mixed signals. What would you change first?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost" id="toPart1" type="button">← Back to Part 1 · Build</button>
+    </div>
+  </section>
+
+</div>
+<script>
+// ===== Perception engine =====
+// Axes: x = Natural/Ayurvedic (-1) <-> Scientific/Clinical (+1)
+//       y = Mass/Everyday value (-1) <-> Premium/Salon (+1)
+const LEVERS = [
+  { id: 'ingredient', p: 'Product', name: 'Hero ingredient', options: [
+    { id: 'bhringraj', label: 'Bhringraj & amla', x: -0.85, y: -0.1, wx: 3, wy: 0.5 },
+    { id: 'onion', label: 'Onion & rosemary', x: -0.5, y: 0.1, wx: 2.5, wy: 0.5 },
+    { id: 'keratin', label: 'Keratin & argan oil', x: 0.35, y: 0.45, wx: 2, wy: 1 },
+    { id: 'zinc', label: 'Zinc pyrithione (anti-dandruff active)', x: 0.85, y: -0.35, wx: 3, wy: 0.8 },
+    { id: 'peptide', label: 'Peptides & hyaluronic acid', x: 0.8, y: 0.7, wx: 2.5, wy: 1.2 }
+  ]},
+  { id: 'design', p: 'Product', name: 'Pack design', options: [
+    { id: 'kraft', label: 'Earthy kraft & leaf green', x: -0.7, y: 0.15, wx: 1.5, wy: 0.8 },
+    { id: 'clinical', label: 'Clinical white & blue', x: 0.75, y: -0.05, wx: 1.5, wy: 0.6 },
+    { id: 'gold', label: 'Glossy black & gold', x: 0.15, y: 0.85, wx: 0.4, wy: 1.6 },
+    { id: 'bright', label: 'Bright family colours', x: 0, y: -0.7, wx: 0.2, wy: 1.4 }
+  ]},
+  { id: 'format', p: 'Product', name: 'Pack format', options: [
+    { id: 'sachet', label: '₹2 sachets + 180 ml bottle', x: 0, y: -0.85, wx: 0, wy: 1.5 },
+    { id: 'bottle', label: '180 ml flip-top bottle', x: 0, y: -0.1, wx: 0, wy: 0.6 },
+    { id: 'pump', label: '300 ml pump + refill pouch', x: 0, y: 0.5, wx: 0, wy: 1 },
+    { id: 'family', label: '1 L family pack', x: 0, y: -0.6, wx: 0, wy: 1 }
+  ]},
+  { id: 'price', p: 'Price', name: 'Price per 100 ml', slider: { min: 30, max: 700, step: 10 } },
+  { id: 'promo', p: 'Price', name: 'Price promotions', options: [
+    { id: 'none', label: 'None', x: 0, y: 0.4, wx: 0, wy: 0.6 },
+    { id: 'occasional', label: 'Occasional (festive only)', x: 0, y: 0, wx: 0, wy: 0.4 },
+    { id: 'monthly', label: 'Monthly offers', x: 0, y: -0.55, wx: 0, wy: 1 },
+    { id: 'bogo', label: 'Always-on buy 1 get 1', x: 0, y: -0.9, wx: 0, wy: 1.8 }
+  ]},
+  { id: 'channel', p: 'Place', name: 'Primary channel', options: [
+    { id: 'kirana', label: 'Kirana stores (general trade)', x: 0, y: -0.75, wx: 0, wy: 1.6 },
+    { id: 'modern', label: 'Supermarkets (modern trade)', x: 0, y: -0.2, wx: 0, wy: 0.8 },
+    { id: 'pharmacy', label: 'Pharmacies & chemists', x: 0.8, y: 0.05, wx: 1.5, wy: 0.5 },
+    { id: 'salon', label: 'Salons', x: 0.4, y: 0.85, wx: 0.6, wy: 1.6 },
+    { id: 'd2c', label: 'D2C website & quick commerce', x: -0.3, y: 0.4, wx: 0.6, wy: 1 }
+  ]},
+  { id: 'message', p: 'Promotion', name: 'Core message', options: [
+    { id: 'heritage', label: '“Dadi’s oiling ritual, in a bottle”', x: -0.9, y: -0.15, wx: 2, wy: 0.5 },
+    { id: 'proof', label: '“Clinically proven: 98% less dandruff”', x: 0.9, y: -0.1, wx: 2, wy: 0.4 },
+    { id: 'glam', label: '“Salon-smooth, every single day”', x: 0.2, y: 0.7, wx: 0.6, wy: 1.5 },
+    { id: 'value', label: '“More bottle for the whole family”', x: 0, y: -0.85, wx: 0.2, wy: 1.6 }
+  ]},
+  { id: 'face', p: 'Promotion', name: 'Face of the brand', options: [
+    { id: 'vaidya', label: 'Ayurvedic vaidya', x: -0.85, y: 0.05, wx: 1.5, wy: 0.3 },
+    { id: 'derm', label: 'Dermatologist', x: 0.85, y: 0.1, wx: 1.5, wy: 0.4 },
+    { id: 'star', label: 'Bollywood star', x: 0.1, y: 0.75, wx: 0.3, wy: 1.3 },
+    { id: 'micro', label: 'Instagram micro-influencers', x: -0.2, y: 0.35, wx: 0.5, wy: 0.8 },
+    { id: 'moms', label: 'Real mothers & families', x: -0.2, y: -0.6, wx: 0.5, wy: 1 }
+  ]}
+];
+
+function priceSignal(p) {
+  const y = -1 + 2 * (Math.log(p) - Math.log(30)) / (Math.log(700) - Math.log(30));
+  return { label: '₹' + p + ' / 100 ml', x: 0, y: Math.max(-1, Math.min(1, y)), wx: 0, wy: 3 };
+}
+
+function signalsOf(mix) {
+  return LEVERS.map(l => {
+    const s = l.slider ? priceSignal(mix[l.id]) : l.options.find(o => o.id === mix[l.id]);
+    return Object.assign({ lever: l.id, leverName: l.name, p: l.p }, s);
+  });
+}
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function gauss(r) { let u = 0, v = 0; while (u === 0) u = r(); while (v === 0) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+// Fixed synthetic panel: each consumer pays different attention to each lever
+const PANEL_SIZE = 80;
+const PANEL = (() => {
+  const r = mulberry32(20261028);
+  const out = [];
+  for (let i = 0; i < PANEL_SIZE; i++) {
+    const att = {};
+    LEVERS.forEach(l => { att[l.id] = Math.exp(gauss(r) * 0.75); });
+    out.push({ att, nx: gauss(r) * 0.04, ny: gauss(r) * 0.04 });
+  }
+  return out;
+})();
+
+function clamp1(v) { return Math.max(-1, Math.min(1, v)); }
+
+function perceive(mix) {
+  const sig = signalsOf(mix);
+  const pts = PANEL.map(c => {
+    let sx = 0, swx = 0, sy = 0, swy = 0;
+    sig.forEach(s => {
+      const a = c.att[s.lever];
+      sx += a * s.wx * s.x; swx += a * s.wx;
+      sy += a * s.wy * s.y; swy += a * s.wy;
+    });
+    return { x: clamp1(sx / swx + c.nx), y: clamp1(sy / swy + c.ny) };
+  });
+  const mx = pts.reduce((a, p) => a + p.x, 0) / pts.length;
+  const my = pts.reduce((a, p) => a + p.y, 0) / pts.length;
+  const sdx = Math.sqrt(pts.reduce((a, p) => a + (p.x - mx) ** 2, 0) / pts.length);
+  const sdy = Math.sqrt(pts.reduce((a, p) => a + (p.y - my) ** 2, 0) / pts.length);
+  const spread = Math.sqrt(sdx * sdx + sdy * sdy);
+  const clarity = Math.round(Math.max(0, Math.min(100, 100 * (1 - (spread - 0.08) / 0.24))));
+  return { sig, pts, x: mx, y: my, sdx, sdy, spread, clarity };
+}
+
+function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+// ===== App =====
+const dec = s => atob(s).split('').reverse().join('').split(',');
+const SHORT = { ingredient: 'Ingredient', design: 'Pack design', format: 'Format', price: 'Price', promo: 'Promotions', channel: 'Channel', message: 'Message', face: 'Face' };
+const P_ORDER = [['Product', 'what it is'], ['Price', 'what it costs'], ['Place', 'where it is sold'], ['Promotion', 'what it says']];
+const HIT_R = 0.18, HIT_CLARITY = 70;
+
+const COMPETITORS = [
+  { name: 'Shine Daily', x: 0.05, y: -0.76 },
+  { name: 'Clearo', x: 0.72, y: -0.12 },
+  { name: 'Vanika Herbals', x: -0.66, y: -0.42 },
+  { name: 'Salonique Pro', x: 0.5, y: 0.8 },
+  { name: 'Dhara Botanics', x: -0.32, y: 0.62 }
+];
+
+const MISSIONS = [
+  { id: 'A', name: 'A · Premium Ayurvedic', target: { x: -0.72, y: 0.45 },
+    text: 'Make Velora the authentic Ayurvedic shampoo that urban professionals are proud to keep in the bathroom. Natural, and clearly not cheap.' },
+  { id: 'B', name: 'B · Everyday clinical', target: { x: 0.78, y: -0.5 },
+    text: 'Dandruff is the top hair worry in many Indian homes. Make Velora the trusted, medical-grade fix that any family can afford, in any town.' },
+  { id: 'C', name: 'C · Accessible science', target: { x: 0.45, y: 0.28 },
+    text: 'Young working women in the metros want salon results without salon prices. Make Velora the smart, science-led upgrade from their mass brand.' },
+  { id: 'free', name: 'Free play', target: null,
+    text: 'No target. Try extreme mixes and watch how the panel reacts.' }
+];
+
+const DEFAULT_MIX = { ingredient: 'onion', design: 'bright', format: 'bottle', price: 120, promo: 'monthly', channel: 'modern', message: 'value', face: 'moms' };
+
+const CASES = [
+  { id: 'amrit', name: 'Amrit Roots', target: MISSIONS[0].target, intended: 'Premium Ayurvedic',
+    statement: 'For urban professionals who trust Ayurveda, Amrit Roots is the premium bhringraj ritual that turns hair care into self-care.',
+    context: 'Launched 18 months ago. To hit volume targets, sales pushed the brand into 400,000 kirana stores, added ₹2 sachets and ran an offer every month. Trial is up. Repeat purchase is falling.',
+    mix: { ingredient: 'bhringraj', design: 'kraft', format: 'sachet', price: 380, promo: 'monthly', channel: 'kirana', message: 'heritage', face: 'vaidya' },
+    culprits: dec('b21vcnAsbGVubmFoYyx0YW1yb2Y=') },
+  { id: 'derma', name: 'DermaPure', target: MISSIONS[1].target, intended: 'Everyday clinical',
+    statement: 'For families fighting dandruff, DermaPure is the affordable, dermatologist-backed fix you can find at every corner store.',
+    context: 'A new brand manager arrived from a luxury cosmetics company. She redesigned the pack and raised the price “to signal efficacy”. Distribution held, but rotation in kirana stores has halved.',
+    mix: { ingredient: 'zinc', design: 'gold', format: 'sachet', price: 420, promo: 'occasional', channel: 'kirana', message: 'proof', face: 'derm' },
+    culprits: dec('ZWNpcnAsbmdpc2Vk') },
+  { id: 'glosse', name: 'Glossé', target: MISSIONS[2].target, intended: 'Accessible science',
+    statement: 'For young working women in the metros, Glossé is the science-led salon finish at an everyday price.',
+    context: 'R&D reformulated around the onion-oil trend. The agency then won the account with a nostalgic film about grandmothers oiling hair. Social listening shows nobody can say what Glossé stands for.',
+    mix: { ingredient: 'onion', design: 'clinical', format: 'bottle', price: 220, promo: 'occasional', channel: 'modern', message: 'heritage', face: 'derm' },
+    culprits: dec('ZWdhc3NlbSx0bmVpZGVyZ25p') }
+];
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const SVGNS = 'http://www.w3.org/2000/svg';
+function s(tag, attrs, style, text) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (style) e.setAttribute('style', style);
+  if (text != null) e.textContent = text;
+  return e;
+}
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (attrs[k] == null) continue;
+    if (k === 'class') e.className = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else if (k === 'html') e.innerHTML = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  kids.flat().forEach(c => { if (c == null) return; e.append(c.nodeType ? c : document.createTextNode(c)); });
+  return e;
+}
+const fmt = v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2);
+const optLabel = (lid, val) => { const l = LEVERS.find(l => l.id === lid); return l.slider ? '₹' + val + ' / 100 ml' : l.options.find(o => o.id === val).label; };
+const isHit = (r, t) => t && dist(r, t) <= HIT_R && r.clarity >= HIT_CLARITY;
+
+// ---------- map ----------
+const M = { size: 560, lo: 60, hi: 500 };
+const px = x => M.lo + (x + 1) / 2 * (M.hi - M.lo);
+const py = y => M.hi - (y + 1) / 2 * (M.hi - M.lo);
+const unit = (M.hi - M.lo) / 2;
+
+function drawMap(svg, o) {
+  svg.textContent = '';
+  // halves
+  svg.append(s('rect', { x: M.lo, y: M.lo, width: (M.hi - M.lo) / 2, height: M.hi - M.lo }, 'fill:var(--natural);opacity:.06'));
+  svg.append(s('rect', { x: (M.lo + M.hi) / 2, y: M.lo, width: (M.hi - M.lo) / 2, height: M.hi - M.lo }, 'fill:var(--science);opacity:.06'));
+  svg.append(s('rect', { x: M.lo, y: M.lo, width: M.hi - M.lo, height: M.hi - M.lo, rx: 4 }, 'fill:none;stroke:var(--line);stroke-width:1'));
+  [-0.5, 0.5].forEach(v => {
+    svg.append(s('line', { x1: px(v), x2: px(v), y1: M.lo, y2: M.hi }, 'stroke:var(--line);stroke-width:1;stroke-dasharray:2 4'));
+    svg.append(s('line', { x1: M.lo, x2: M.hi, y1: py(v), y2: py(v) }, 'stroke:var(--line);stroke-width:1;stroke-dasharray:2 4'));
+  });
+  svg.append(s('line', { x1: px(0), x2: px(0), y1: M.lo, y2: M.hi }, 'stroke:var(--muted);stroke-width:1;opacity:.45'));
+  svg.append(s('line', { x1: M.lo, x2: M.hi, y1: py(0), y2: py(0) }, 'stroke:var(--muted);stroke-width:1;opacity:.45'));
+  // axis labels
+  svg.append(s('text', { x: 280, y: 40, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 600 }, 'fill:var(--ink)', 'Premium / Salon ▲'));
+  svg.append(s('text', { x: 280, y: 532, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 600 }, 'fill:var(--ink)', '▼ Mass / Everyday value'));
+  svg.append(s('text', { x: 36, y: 280, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 600, transform: 'rotate(-90 36 280)' }, 'fill:var(--natural)', '◀ Natural / Ayurvedic'));
+  svg.append(s('text', { x: 524, y: 280, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 600, transform: 'rotate(90 524 280)' }, 'fill:var(--science)', 'Scientific / Clinical ▶'));
+
+  // competitors
+  COMPETITORS.forEach(c => {
+    svg.append(s('rect', { x: px(c.x) - 6, y: py(c.y) - 6, width: 12, height: 12, rx: 2 }, 'fill:var(--muted);opacity:.55'));
+    const anchor = c.x > 0.55 ? 'end' : 'start';
+    const tx = anchor === 'end' ? px(c.x) - 10 : px(c.x) + 10;
+    svg.append(s('text', { x: tx, y: py(c.y) + 4, 'font-size': 12, 'text-anchor': anchor }, 'fill:var(--muted)', c.name));
+  });
+
+  // target
+  if (o.target) {
+    const tx = px(o.target.x), ty = py(o.target.y);
+    svg.append(s('circle', { cx: tx, cy: ty, r: HIT_R * unit }, 'fill:var(--accent);fill-opacity:.06;stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 4'));
+    svg.append(s('line', { x1: tx - 6, x2: tx + 6, y1: ty, y2: ty }, 'stroke:var(--ink);stroke-width:1.5'));
+    svg.append(s('line', { x1: tx, x2: tx, y1: ty - 6, y2: ty + 6 }, 'stroke:var(--ink);stroke-width:1.5'));
+    svg.append(s('text', { x: tx, y: ty - HIT_R * unit - 7, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700 }, 'fill:var(--ink)', o.targetLabel || 'Target'));
+  }
+
+  // ghost (earlier result)
+  if (o.ghost) {
+    o.ghost.pts.forEach(p => svg.append(s('circle', { cx: px(p.x), cy: py(p.y), r: 2.5 }, 'fill:var(--muted);opacity:.25')));
+    svg.append(s('circle', { cx: px(o.ghost.x), cy: py(o.ghost.y), r: 7 }, 'fill:none;stroke:var(--muted);stroke-width:2'));
+    svg.append(s('text', { x: px(o.ghost.x) + 11, y: py(o.ghost.y) + 4, 'font-size': 11 }, 'fill:var(--muted)', o.ghostLabel || 'Before'));
+  }
+
+  // trail of earlier runs
+  if (o.trail && o.trail.length > 1) {
+    const d = o.trail.map((p, i) => (i ? 'L' : 'M') + px(p.x).toFixed(1) + ' ' + py(p.y).toFixed(1)).join(' ');
+    svg.append(s('path', { d }, 'fill:none;stroke:var(--accent);stroke-width:1.2;stroke-dasharray:3 3;opacity:.6'));
+    o.trail.slice(0, -1).forEach(p => svg.append(s('circle', { cx: px(p.x), cy: py(p.y), r: 3.5 }, 'fill:var(--surface);stroke:var(--accent);stroke-width:1.2;opacity:.7')));
+  }
+
+  const r = o.result;
+  if (!r) {
+    svg.append(s('text', { x: 280, y: 286, 'text-anchor': 'middle', 'font-size': 14 }, 'fill:var(--muted)', 'Run the consumer panel to place Velora'));
+    return;
+  }
+
+  // signals
+  if (o.signals) {
+    r.sig.forEach((g, i) => {
+      const sx = g.wx === 0 ? r.x : g.x;
+      const X = px(sx), Y = py(g.y);
+      svg.append(s('line', { x1: px(r.x), y1: py(r.y), x2: X, y2: Y }, 'stroke:var(--gold);stroke-width:1.2;opacity:.7'));
+      svg.append(s('rect', { x: X - 5, y: Y - 5, width: 10, height: 10, transform: `rotate(45 ${X} ${Y})` }, 'fill:var(--gold)'));
+      const right = X < 420;
+      svg.append(s('text', { x: right ? X + 9 : X - 9, y: Y + 4 + ((i % 2) ? 9 : -2), 'font-size': 11, 'font-weight': 600, 'text-anchor': right ? 'start' : 'end' }, 'fill:var(--gold)', SHORT[g.lever]));
+    });
+  }
+
+  // shoppers
+  r.pts.forEach(p => svg.append(s('circle', { cx: px(p.x).toFixed(1), cy: py(p.y).toFixed(1), r: 3.6, class: 'dot' }, 'fill:var(--accent);fill-opacity:.38')));
+  // centroid
+  svg.append(s('circle', { cx: px(r.x), cy: py(r.y), r: 9, class: 'centroid' }, 'fill:var(--accent);stroke:var(--surface);stroke-width:2.5'));
+  svg.append(s('text', { x: px(r.x) + 13, y: py(r.y) - 10, 'font-size': 14, 'font-weight': 700 }, 'fill:var(--accent)', o.brand || 'Velora'));
+}
+
+function legend(el, extra) {
+  el.innerHTML = '';
+  const items = [['var(--accent)', 'One shopper'], ['var(--muted)', 'Competitor'], ['var(--gold)', 'Lever signal']].concat(extra || []);
+  items.forEach(([c, t]) => el.append(h('span', null, h('i', { style: `background:${c}` }), t)));
+}
+
+function readouts(el, r, target) {
+  el.innerHTML = '';
+  const cell = (label, val) => h('div', { class: 'ro' }, h('small', null, label), h('b', null, val));
+  el.append(
+    cell('Natural ↔ Clinical', r ? fmt(r.x) : '—'),
+    cell('Mass ↔ Premium', r ? fmt(r.y) : '—'),
+    cell('Clarity', r ? r.clarity + '%' : '—'),
+    cell('Distance to target', r && target ? dist(r, target).toFixed(2) : '—')
+  );
+}
+
+// ---------- controls ----------
+function buildControls(container, mix, onChange, original) {
+  container.innerHTML = '';
+  const fields = {};
+  P_ORDER.forEach(([p, hint]) => {
+    const g = h('div', { class: 'pgroup' }, h('div', { class: 'ptag' }, p, h('span', null, hint)));
+    LEVERS.filter(l => l.p === p).forEach(l => {
+      const fid = container.id + '-' + l.id;
+      let input;
+      if (l.slider) {
+        const out = h('output', { for: fid }, '₹' + mix[l.id]);
+        input = h('input', { type: 'range', id: fid, min: l.slider.min, max: l.slider.max, step: l.slider.step, value: mix[l.id] });
+        input.addEventListener('input', () => { mix[l.id] = +input.value; out.textContent = '₹' + input.value; onChange(); });
+        g.append(fields[l.id] = h('div', { class: 'field' }, h('label', { for: fid }, l.name), h('div', { class: 'pricerow' }, input, out)));
+      } else {
+        input = h('select', { id: fid }, l.options.map(op => h('option', { value: op.id }, op.label)));
+        input.value = mix[l.id];
+        input.addEventListener('change', () => { mix[l.id] = input.value; onChange(); });
+        g.append(fields[l.id] = h('div', { class: 'field' }, h('label', { for: fid }, l.name), input));
+      }
+    });
+    container.append(g);
+  });
+  const mark = () => { if (!original) return; LEVERS.forEach(l => fields[l.id].classList.toggle('changed', mix[l.id] !== original[l.id])); };
+  mark();
+  return { mark };
+}
+
+// ================= PART 1 =================
+const P1 = { mission: 'A', mix: { ...DEFAULT_MIX }, result: null, dirty: true, per: {} };
+MISSIONS.forEach(m => P1.per[m.id] = { runs: 0, trail: [] });
+
+function renderMissions() {
+  const box = $('missions'); box.innerHTML = '';
+  MISSIONS.forEach(m => box.append(h('button', { class: 'chip', 'aria-pressed': String(m.id === P1.mission), onclick: () => { P1.mission = m.id; renderMissions(); renderP1(); } }, m.name)));
+  const m = MISSIONS.find(m => m.id === P1.mission);
+  $('brief').innerHTML = '';
+  $('brief').append(h('div', { class: 'eyebrow' }, m.id === 'free' ? 'Free play' : 'Brief ' + m.name), h('p', null, m.text));
+}
+
+function renderP1() {
+  const m = MISSIONS.find(m => m.id === P1.mission);
+  const per = P1.per[m.id];
+  drawMap($('map1'), { result: P1.result, target: m.target, signals: $('sig1').checked, trail: per.trail });
+  readouts($('ro1'), P1.result, m.target);
+  $('runs1').textContent = 'Panel runs on this brief: ' + per.runs;
+  $('dirty1').hidden = !(P1.dirty && P1.result);
+  const st = $('status1'); st.innerHTML = '';
+  const r = P1.result;
+  if (!r) { st.append(h('p', { class: 'note' }, 'Set the mix on the left, then run the panel. Each dot is one of 80 shoppers; the large dot is Velora’s average position.')); return; }
+  let pill, msg;
+  if (!m.target) { pill = h('span', { class: 'pill' }, 'Free play'); msg = r.clarity >= HIT_CLARITY ? 'Shoppers broadly agree on what Velora is.' : 'Shoppers disagree about what Velora is. Look for levers pulling in opposite directions.'; }
+  else if (isHit(r, m.target)) { pill = h('span', { class: 'pill good' }, '● On target'); msg = `Brief ${m.id} reached in ${per.runs} panel run${per.runs > 1 ? 's' : ''}. Try another brief, or reach this one with fewer levers at extreme settings.`; }
+  else if (r.clarity < HIT_CLARITY) { pill = h('span', { class: 'pill warn' }, '● Blurred'); msg = 'Shoppers read Velora in different ways, so the cloud is wide. Some of your levers are sending opposite signals.'; }
+  else { pill = h('span', { class: 'pill bad' }, '● Off target'); msg = 'Shoppers agree on what Velora is, but it is not what the brief asked for. Which axis is off?'; }
+  st.append(h('div', { class: 'btnrow' }, pill, h('span', { class: 'note', style: 'flex:1;min-width:200px' }, msg)));
+}
+
+function runP1() {
+  const per = P1.per[P1.mission];
+  P1.result = perceive(P1.mix);
+  per.runs++;
+  per.trail.push({ x: P1.result.x, y: P1.result.y });
+  P1.dirty = false;
+  renderP1();
+}
+
+// ================= PART 2 =================
+const freshCase = c => ({ suspects: new Set(), stage: 1, mix: { ...c.mix }, base: perceive(c.mix), result: null, runs: 0, solved: false });
+const P2 = { idx: 0, cases: CASES.map(freshCase) };
+const resetCaseBtn = () => h('button', { class: 'btn ghost', onclick: () => { P2.cases[P2.idx] = freshCase(CASES[P2.idx]); renderP2(); } }, '↺ Start this case again');
+
+function renderCaseTabs() {
+  const box = $('cases'); box.innerHTML = '';
+  CASES.forEach((c, i) => {
+    const st = P2.cases[i];
+    box.append(h('button', { class: 'chip', 'aria-pressed': String(i === P2.idx), onclick: () => { P2.idx = i; renderP2(); } }, (st.solved ? '✓ ' : '') + c.name));
+  });
+}
+
+function stageHead(n, label, on) { return h('div', { class: 'stage' + (on ? ' on' : '') }, h('span', { class: 'n' }, String(n)), label); }
+
+function renderP2() {
+  renderCaseTabs();
+  const c = CASES[P2.idx], st = P2.cases[P2.idx];
+  const head = $('casehead'); head.innerHTML = '';
+  head.append(
+    h('div', { class: 'field' }, h('div', { class: 'eyebrow' }, 'Intended positioning · ' + c.intended), h('p', { class: 'statement' }, c.statement)),
+    h('p', { class: 'note' }, c.context)
+  );
+  const body = $('casebody'); body.innerHTML = '';
+  const maxChanges = c.culprits.length;
+
+  if (st.stage === 1 || st.stage === 1.5) {
+    const diagnosed = st.stage === 1.5;
+    body.append(stageHead(1, 'Diagnose · which levers blur the brand?', true));
+    if (!diagnosed) body.append(h('p', { class: 'note' }, 'Compare the intended positioning with the cloud on the map. Tick every lever you think is sending the wrong signal, then submit.'));
+    const list = h('div', { class: 'mixlist' });
+    LEVERS.forEach(l => {
+      const sel = st.suspects.has(l.id), cul = c.culprits.includes(l.id);
+      const cb = h('input', { type: 'checkbox', id: 'sus-' + l.id, 'aria-label': 'Suspect ' + l.name });
+      cb.checked = sel; cb.disabled = diagnosed;
+      cb.addEventListener('change', () => { cb.checked ? st.suspects.add(l.id) : st.suspects.delete(l.id); renderP2(); });
+      let tag = null;
+      if (diagnosed) {
+        if (cul && sel) tag = h('span', { class: 'verdict hit' }, 'Found');
+        else if (cul) tag = h('span', { class: 'verdict miss' }, 'Missed');
+        else if (sel) tag = h('span', { class: 'verdict false' }, 'False alarm');
+        else tag = h('span', { class: 'verdict ok' }, 'Fine');
+      }
+      list.append(h('label', { class: 'mixrow' + (sel ? ' suspect' : ''), for: 'sus-' + l.id }, cb,
+        h('span', null, h('div', { class: 'lv' }, l.p + ' · ' + l.name), h('div', { class: 'op' }, optLabel(l.id, st.mix[l.id]))), tag));
+    });
+    body.append(list);
+    if (!diagnosed) {
+      body.append(h('div', { class: 'btnrow' }, h('button', { class: 'btn', disabled: st.suspects.size ? null : 'disabled', onclick: () => { st.stage = 1.5; renderP2(); } }, 'Submit diagnosis'),
+        h('span', { class: 'note' }, st.suspects.size + ' lever' + (st.suspects.size === 1 ? '' : 's') + ' suspected')));
+      if (!st.suspects.size) body.querySelector('.btn').disabled = true;
+    } else {
+      const found = c.culprits.filter(x => st.suspects.has(x)).length;
+      const falses = [...st.suspects].filter(x => !c.culprits.includes(x)).length;
+      const good = found === c.culprits.length && falses === 0;
+      body.append(h('div', { class: 'feedback ' + (good ? 'good' : 'warn') },
+        h('b', null, `You found ${found} of ${c.culprits.length} culprits` + (falses ? `, with ${falses} false alarm${falses > 1 ? 's' : ''}.` : '.')),
+        h('span', null, 'The gold diamonds on the map now show where each lever pulls. Culprits sit far from the intended position, on the axis where the cloud is stretched.')));
+      body.append(h('div', { class: 'btnrow' }, h('button', { class: 'btn', onclick: () => { st.stage = 2; renderP2(); } }, 'Repair the mix →'), resetCaseBtn()));
+    }
+  } else {
+    body.append(stageHead(2, `Repair · change at most ${maxChanges} levers`, true));
+    const changed = () => LEVERS.filter(l => st.mix[l.id] !== c.mix[l.id]).length;
+    const counter = h('span', { class: 'counter' });
+    const runBtn = h('button', { class: 'btn', onclick: () => { st.result = perceive(st.mix); st.runs++; if (isHit(st.result, c.target)) st.solved = true; renderP2(); } }, 'Run consumer panel');
+    const resetBtn = h('button', { class: 'btn ghost', onclick: () => { st.mix = { ...c.mix }; st.result = null; renderP2(); } }, 'Reset to original');
+    const box = h('div', { id: 'controls2' });
+    body.append(h('p', { class: 'note' }, 'Changed levers are outlined. Keep everything else as it is: the brand already has equity in it.'), box);
+    const update = () => {
+      const n = changed();
+      counter.textContent = `${n} / ${maxChanges} changes`;
+      counter.style.color = n > maxChanges ? 'var(--bad)' : 'var(--muted)';
+      runBtn.disabled = n > maxChanges || n === 0;
+    };
+    const ctl = buildControls(box, st.mix, () => { ctl.mark(); update(); }, c.mix);
+    body.append(h('div', { class: 'btnrow' }, runBtn, resetBtn, counter));
+    update();
+    if (st.result) {
+      const r = st.result, hit = isHit(r, c.target);
+      const msg = hit ? `Repaired. ${c.name} now sits inside the intended zone with ${r.clarity}% clarity (it started at ${st.base.clarity}%).`
+        : r.clarity < HIT_CLARITY ? 'Still blurred. At least one lever is still pulling against the others.'
+        : 'Clear now, but outside the intended zone. Check the axis you have not fixed yet.';
+      body.append(h('div', { class: 'feedback ' + (hit ? 'good' : 'warn') }, h('b', null, hit ? 'Position restored' : 'Not there yet'), h('span', null, msg)));
+    }
+    body.append(h('div', { class: 'btnrow' }, h('button', { class: 'btn ghost', onclick: () => { st.stage = 1.5; renderP2(); } }, '← Back to diagnosis'), resetCaseBtn()));
+  }
+
+  // map
+  const showResult = st.stage === 2 && st.result ? st.result : st.base;
+  drawMap($('map2'), {
+    result: showResult, target: c.target, targetLabel: 'Intended', brand: c.name,
+    signals: st.stage !== 1, ghost: st.stage === 2 && st.result ? st.base : null, ghostLabel: 'Before'
+  });
+  readouts($('ro2'), showResult, c.target);
+  $('map2title').textContent = st.stage === 2 && st.result ? 'After your repair' : 'What shoppers see today';
+  const p = $('pill2'); p.innerHTML = '';
+  const hit = isHit(showResult, c.target);
+  p.append(h('span', { class: 'pill ' + (hit ? 'good' : showResult.clarity < HIT_CLARITY ? 'warn' : 'bad') }, hit ? '● On position' : showResult.clarity < HIT_CLARITY ? '● Blurred' : '● Off position'));
+  legend($('legend2'), st.stage === 2 && st.result ? [['var(--muted)', 'Before repair (hollow)']] : []);
+}
+
+// ================= routing =================
+function showView(view) {
+  $('view-build').hidden = view !== 'build';
+  $('view-diagnose').hidden = view !== 'diagnose';
+  $('stepnow').textContent = view === 'build' ? 'Part 1 of 2 · Build' : 'Part 2 of 2 · Diagnose';
+  window.scrollTo(0, 0);
+}
+
+// ================= boot =================
+function start() {
+  renderMissions();
+  buildControls($('controls1'), P1.mix, () => { P1.dirty = true; $('dirty1').hidden = !P1.result; });
+  $('run1').addEventListener('click', runP1);
+  $('sig1').addEventListener('change', renderP1);
+  legend($('legend1'), [['var(--ink)', 'Target zone (dashed)']]);
+  renderP1();
+  renderP2();
+  $('toPart2').addEventListener('click', () => showView('diagnose'));
+  $('toPart1').addEventListener('click', () => showView('build'));
+  showView('build');
+}
+start();
+
+// ================= full restart (two-click confirm) =================
+(function () {
+  const btn = $('resetAll');
+  let armed = false, timer = null;
+  const disarm = () => { armed = false; btn.textContent = '↺ Restart simulation'; btn.style.borderColor = ''; btn.style.color = ''; };
+  btn.addEventListener('click', () => {
+    if (!armed) {
+      armed = true;
+      btn.textContent = 'Click again to erase all progress';
+      btn.style.borderColor = 'var(--bad)'; btn.style.color = 'var(--bad)';
+      clearTimeout(timer); timer = setTimeout(disarm, 4000);
+      return;
+    }
+    clearTimeout(timer); disarm();
+    // Part 1
+    P1.mission = 'A';
+    Object.assign(P1.mix, DEFAULT_MIX);
+    P1.result = null; P1.dirty = true;
+    MISSIONS.forEach(m => P1.per[m.id] = { runs: 0, trail: [] });
+    $('sig1').checked = false;
+    buildControls($('controls1'), P1.mix, () => { P1.dirty = true; $('dirty1').hidden = !P1.result; });
+    renderMissions(); renderP1();
+    // Part 2
+    P2.idx = 0;
+    P2.cases = CASES.map(freshCase);
+    renderP2();
+    // back to the start
+    showView('build');
+    window.scrollTo(0, 0);
+  });
+})();
+
+</script>
+
+</body>
+</html>
