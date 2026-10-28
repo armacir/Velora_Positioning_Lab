@@ -1,2 +1,2 @@
-# Velora_Positioning_Lab
+# Index
 Velora Positioning Simulation
