@@ -1,0 +1,1007 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>First Move</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a facilitator console — slim year rail on top, one working surface below; projected board uses big numbers, the team desk is a two-column report | decision sheet */
+:root{
+  --bg:#f5f7f9; --panel:#ffffff; --ink:#0f1d2e; --ink2:#4a5868; --muted:#7a8796; --line:#dde3ea; --line2:#eef2f6;
+  --navy:#0b2e5c; --navy-ink:#ffffff; --aqua:#0e8fa3; --aqua-soft:#e3f3f5;
+  --good:#1e7d4a; --good-bg:#e5f4ec; --warn:#a96400; --warn-bg:#fdf1dc; --bad:#b3261e; --bad-bg:#fbe7e5;
+  --t1:#2a78d6; --t2:#eb6834; --t3:#1baf7a; --t4:#eda100; --t5:#e87ba4; --t6:#008300; --t7:#6250d6; --t8:#e34948;
+  --k-B:#5b6b7c; --k-P:#2a78d6; --k-E:#7a4fc9; --k-I:#b9c2cc;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c141d; --panel:#131e2a; --ink:#e8eef4; --ink2:#b3c0cd; --muted:#8494a5; --line:#24333f; --line2:#1a2733;
+  --navy:#7fb2f0; --navy-ink:#0c141d; --aqua:#3cc0d2; --aqua-soft:#12303a;
+  --good:#5cc98a; --good-bg:#13301f; --warn:#f0b54a; --warn-bg:#33270f; --bad:#f08a80; --bad-bg:#3a1714;
+  --t1:#3987e5; --t2:#d95926; --t3:#199e70; --t4:#c98500; --t5:#d55181; --t6:#008300; --t7:#9085e9; --t8:#e66767;
+  --k-B:#8a9bad; --k-P:#5a9ff0; --k-E:#a688e8; --k-I:#3a4856; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c141d; --panel:#131e2a; --ink:#e8eef4; --ink2:#b3c0cd; --muted:#8494a5; --line:#24333f; --line2:#1a2733;
+  --navy:#7fb2f0; --navy-ink:#0c141d; --aqua:#3cc0d2; --aqua-soft:#12303a;
+  --good:#5cc98a; --good-bg:#13301f; --warn:#f0b54a; --warn-bg:#33270f; --bad:#f08a80; --bad-bg:#3a1714;
+  --t1:#3987e5; --t2:#d95926; --t3:#199e70; --t4:#c98500; --t5:#d55181; --t6:#008300; --t7:#9085e9; --t8:#e66767;
+  --k-B:#8a9bad; --k-P:#5a9ff0; --k-E:#a688e8; --k-I:#3a4856; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.05}
+h2{font-size:24px;font-weight:750;line-height:1.15}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--navy);color:var(--navy-ink)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding-block:10px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-family:var(--display);font-stretch:75%;font-weight:800;font-size:24px;letter-spacing:.01em;text-transform:uppercase}
+.brand span{font-family:var(--mono);font-size:11px;opacity:.75;letter-spacing:.08em}
+.rail{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.yr{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:3px;border:1px solid color-mix(in srgb,var(--navy-ink) 30%,transparent);opacity:.6}
+.yr.done{opacity:.85}
+.yr.now{opacity:1;background:var(--navy-ink);color:var(--navy);font-weight:600}
+.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+.tab{background:none;border:0;color:var(--navy-ink);opacity:.72;padding:6px 10px;border-radius:4px;font-weight:500;font-size:14px}
+.tab:hover{opacity:1}
+.tab[aria-current="true"]{opacity:1;background:color-mix(in srgb,var(--navy-ink) 16%,transparent)}
+
+main{padding-top:28px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;min-width:0}
+.panel>h3{margin-bottom:10px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.muted{color:var(--muted)} .ink2{color:var(--ink2)}
+.small{font-size:13px}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:6px;font-weight:500}
+.btn:hover{border-color:var(--ink2)}
+.btn.primary{background:var(--navy);color:var(--navy-ink);border-color:var(--navy);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.aqua{background:var(--aqua);color:#fff;border-color:var(--aqua);font-weight:600}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--line2);color:var(--ink2);white-space:nowrap}
+.chip.good{background:var(--good-bg);color:var(--good)} .chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.aqua{background:var(--aqua-soft);color:var(--aqua)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.r,th.r{text-align:right}
+.scroll{overflow-x:auto}
+.banner{border-left:4px solid var(--aqua);background:var(--aqua-soft);padding:12px 16px;border-radius:0 6px 6px 0}
+.banner.warn{border-color:var(--warn);background:var(--warn-bg)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kpi .v{font-family:var(--display);font-stretch:80%;font-weight:750;font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12px;color:var(--muted)}
+.stage{font-family:var(--display);font-stretch:75%;text-transform:uppercase;font-weight:800;letter-spacing:.04em}
+
+/* setup */
+.hero{padding-block:12px 24px;display:grid;gap:14px;max-width:760px}
+.hero p{font-size:17px;color:var(--ink2);max-width:62ch}
+.team-edit{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+input[type=text],input[type=number],select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0}
+input[type=range]{width:100%;accent-color:var(--navy)}
+label.cb{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)}
+
+/* desk */
+.teambar{display:flex;gap:8px;flex-wrap:wrap}
+.tpick{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel);font-weight:600}
+.tpick[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tpick .st{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--muted)}
+.tpick .st.ok{color:var(--good)}
+.desk{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:start}
+@media (max-width:900px){.desk{grid-template-columns:1fr}}
+.dec-sec{border-top:1px solid var(--line2);padding-top:14px;display:grid;gap:10px}
+.dec-sec:first-child{border-top:0;padding-top:0}
+.dec-sec h4{margin:0;font-family:var(--display);font-stretch:85%;font-size:16px;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.dec-sec h4 .tag{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--aqua);letter-spacing:.06em;text-transform:uppercase}
+.attr-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,2.6fr);gap:10px;align-items:center}
+@media (max-width:560px){.attr-row{grid-template-columns:1fr}}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-left:1px solid var(--line);background:var(--panel);padding:6px 4px;font-size:12px;line-height:1.25;min-height:40px}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--navy-ink);font-weight:600}
+.seg.c3{grid-template-columns:repeat(3,1fr)}
+.seg.c4w{grid-template-columns:repeat(2,1fr)}
+@media (min-width:560px){.seg.c4w{grid-template-columns:repeat(4,1fr)}}
+.attr-name b{display:block;font-size:14px}
+.attr-name span{font-size:12px;color:var(--muted)}
+.cur{font-family:var(--mono);font-size:10px;color:var(--aqua)}
+.slider{display:grid;grid-template-columns:minmax(110px,1fr) 2fr auto;gap:12px;align-items:center}
+.slider output{font-family:var(--mono);font-size:14px;min-width:84px;text-align:right}
+@media (max-width:560px){.slider{grid-template-columns:1fr auto}.slider input{grid-column:1/-1;grid-row:2}}
+.preview{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px)}
+.ledger{display:grid;grid-template-columns:1fr auto;gap:4px 16px;font-size:14px}
+.ledger .tot{border-top:1px solid var(--line);padding-top:6px;font-weight:600}
+.privacy{display:grid;place-items:center;text-align:center;padding:48px 16px;gap:12px}
+
+/* 4A bars */
+.fa{display:grid;gap:8px}
+.fa-row{display:grid;grid-template-columns:110px 1fr 40px;gap:10px;align-items:center;font-size:13px}
+.fa-track{height:10px;background:var(--line2);border-radius:5px;overflow:hidden}
+.fa-fill{height:100%;background:var(--aqua);border-radius:0 4px 4px 0}
+.fa-row.low .fa-fill{background:var(--warn)}
+.fa-row.low b{color:var(--warn)}
+
+/* kano grid */
+.kgrid{display:grid;gap:3px;font-size:12px}
+.kcell{padding:4px 6px;border-radius:3px;text-align:center;font-weight:600;color:#fff}
+.k-B{background:var(--k-B)} .k-P{background:var(--k-P)} .k-E{background:var(--k-E)} .k-I{background:var(--k-I);color:var(--ink2)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
+.legend i{width:12px;height:12px;border-radius:2px;display:inline-block;vertical-align:-2px;margin-right:4px}
+
+/* charts */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--muted);font-family:var(--mono);font-size:11px}
+.chart .gl{stroke:var(--line2)}
+.chart .ax{stroke:var(--line)}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:5px;z-index:50;max-width:240px;line-height:1.35}
+.matrix{display:grid;grid-template-columns:28px 1fr 1fr;grid-template-rows:1fr 1fr 24px;gap:4px;min-height:240px}
+.mq{border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:4px;font-size:12px}
+.mq .q{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mq.hi{background:var(--aqua-soft)} .mq.lo{background:var(--line2)}
+.ylab{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:.06em}
+.xlab{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:.06em}
+.pchip{display:inline-flex;gap:5px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-weight:600}
+textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:11px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;font-weight:500;z-index:60}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:var(--warn-bg);border-radius:6px}
+details summary{cursor:pointer;font-weight:600}
+@media (prefers-reduced-motion: no-preference){.fa-fill{transition:width .4s ease}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><b>First Move</b><span>PRODUCT LAUNCH SIMULATION</span></div>
+    <div class="rail" id="rail"></div>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<div id="tip" hidden></div>
+
+<script>
+// ===== First Move — market engine (pure functions) =====
+const ENGINE = (() => {
+  const YEARS = 5;
+  const POTENTIAL = 3000000; // households in the addressable market
+  const TIERS = ['Metros (Tier 1)', 'Tier 2 cities', 'Tier 3 towns'];
+  const COV = [[0, .6, 1], [0, .35, 1], [0, .15, .9]];
+  const DIST_COST = [[0, .4, 2.0], [0, .4, 2.5], [0, .4, 3.2]];
+  const DEALER_SETUP = 1.5;
+  const OVERHEAD = 1.5;
+  const STEP_COST = [0, 1.0, 2.0, 3.5];
+  const WAAS_RD = 8;
+  const KANO_COST = 0.5, MARKET_COST = 0.4;
+  const NET = 0.78; // share of shelf price kept after dealer/online margins
+  const INTEREST = 0.12;
+
+  const SEGS = [
+    { id: 'INN', name: 'Innovators', share: .025, tiers: [.6, .3, .1], wtp: 18000, sens: 1.0, ready: .8, floor: 1, prev: null, thr: 1, stigma: 0, emi: 0, benefit: 'smart', sub: .1,
+      blurb: 'Tech-curious urban professionals. Buy early, tolerate risk, want to be first.' },
+    { id: 'EA', name: 'Early adopters', share: .135, tiers: [.5, .35, .15], wtp: 15000, sens: 1.4, ready: .6, floor: .35, prev: 'INN', thr: .25, stigma: 1.2, emi: .05, benefit: 'smart', sub: .3,
+      blurb: 'Aspirational upper-middle-class families. Opinion leaders; image matters to them.' },
+    { id: 'EM', name: 'Early majority', share: .34, tiers: [.3, .45, .25], wtp: 11000, sens: 2.0, ready: .5, floor: .08, prev: 'EA', thr: .3, stigma: .8, emi: .15, benefit: 'health', sub: .2,
+      blurb: 'Middle-class families. Careful buyers who wait to see what neighbours buy.' },
+    { id: 'LM', name: 'Late majority', share: .34, tiers: [.15, .4, .45], wtp: 8500, sens: 2.6, ready: .45, floor: .04, prev: 'EM', thr: .3, stigma: 0, emi: .25, benefit: 'savings', sub: .5,
+      blurb: 'Budget-conscious households. Buy once the product is proven and easy to pay for.' },
+    { id: 'LAG', name: 'Laggards', share: .16, tiers: [.05, .25, .7], wtp: 6500, sens: 3.2, ready: .35, floor: .02, prev: 'LM', thr: .35, stigma: 0, emi: .25, benefit: 'price', sub: .6,
+      blurb: 'Traditional households, mostly in small towns. Boil water today; hard to convince.' },
+  ];
+  SEGS.forEach(s => s.size = POTENTIAL * s.share);
+
+  // Attribute = product characteristic -> performance -> benefit (customer value chain)
+  const ATTRS = [
+    { id: 'pur', name: 'Purification', levels: ['Carbon filter', 'UV', 'RO', 'RO + UV + UF'], perf: 'Removes bacteria, salts and heavy metals', benefit: 'Family health', cost: [0, 600, 1500, 2300] },
+    { id: 'min', name: 'Mineral & taste', levels: ['None', 'TDS control', 'Mineral cartridge', 'Adaptive mineraliser'], perf: 'Keeps healthy minerals, water tastes good', benefit: 'Health & enjoyment', cost: [0, 300, 700, 1100] },
+    { id: 'run', name: 'Filter life', levels: ['6 months', '12 months', '18 months', '24 months'], perf: 'Fewer filter changes', benefit: 'Lower running cost', cost: [0, 250, 600, 1000] },
+    { id: 'wat', name: 'Water saving', levels: ['70% wasted', '50% wasted', '35% wasted', '20% wasted'], perf: 'Less water rejected by the RO stage', benefit: 'Saves water & money', cost: [0, 300, 700, 1200] },
+    { id: 'app', name: 'Smart features', levels: ['None', 'LED alerts', 'App monitoring', 'App + auto filter reorder'], perf: 'Shows water quality, warns before filters expire', benefit: 'Convenience & modern image', cost: [0, 200, 800, 1400] },
+    { id: 'des', name: 'Design', levels: ['Plain box', 'Clean', 'Premium', 'Designer glass'], perf: 'Looks good in the kitchen', benefit: 'Status & pride', cost: [0, 250, 600, 1000] },
+  ];
+  const BASE_UNIT_COST = 3500;
+
+  const MESSAGES = {
+    health: { label: 'Safe water for your family', benefit: 'health' },
+    smart: { label: 'Smart & modern', benefit: 'smart' },
+    savings: { label: 'Saves money every month', benefit: 'savings' },
+    price: { label: 'The most affordable purifier', benefit: 'price' },
+  };
+
+  // Initial Kano map: per segment, per attribute. B=basic(req), P=performance(w), E=excitement(w), I=indifferent
+  const KANO0 = {
+    INN: [{ t: 'B', req: 2 }, { t: 'P', w: .45 }, { t: 'I' }, { t: 'E', w: .5 }, { t: 'E', w: .9 }, { t: 'P', w: .4 }],
+    EA: [{ t: 'B', req: 2 }, { t: 'P', w: .45 }, { t: 'P', w: .3 }, { t: 'E', w: .5 }, { t: 'E', w: .7 }, { t: 'E', w: .6 }],
+    EM: [{ t: 'B', req: 2 }, { t: 'E', w: .5 }, { t: 'P', w: .5 }, { t: 'E', w: .4 }, { t: 'I' }, { t: 'E', w: .4 }],
+    LM: [{ t: 'B', req: 1 }, { t: 'I' }, { t: 'P', w: .7 }, { t: 'I' }, { t: 'I' }, { t: 'I' }],
+    LAG: [{ t: 'B', req: 1 }, { t: 'I' }, { t: 'P', w: .8 }, { t: 'I' }, { t: 'I' }, { t: 'I' }],
+  };
+  const E_CURVE = [0, .8, 1.3, 1.6];
+  const SUBST = { INN: 0, EA: .2, EM: .5, LM: .8, LAG: .9 };
+  const SUBST_YEAR = { 4: .5, 5: 1 };
+
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const logistic = x => 1 / (1 + Math.exp(-x));
+
+  function attrUtil(k, lvl) {
+    if (k.t === 'B') return lvl < k.req ? -1.5 * (k.req - lvl) : 0;
+    if (k.t === 'P') return k.w * (lvl - 1);
+    if (k.t === 'E') return k.w * E_CURVE[lvl];
+    return 0;
+  }
+  function credible(msg, attrs, price) {
+    if (msg === 'health') return attrs[0] >= 2;
+    if (msg === 'smart') return attrs[4] >= 2 || attrs[5] >= 2;
+    if (msg === 'savings') return attrs[2] >= 2 || attrs[3] >= 2;
+    if (msg === 'price') return price <= 9000;
+    return true;
+  }
+  function unitCost(attrs) { return BASE_UNIT_COST + attrs.reduce((s, l, i) => s + ATTRS[i].cost[l], 0); }
+
+  // utility components for one offer and one segment
+  function offerUtility(seg, kanoRow, offer, year) {
+    let ua = 0; offer.attrs.forEach((l, i) => ua += attrUtil(kanoRow[i], l));
+    let um = 0;
+    const cred = credible(offer.msg, offer.attrs, offer.price);
+    if (!cred) um -= .3; else if (MESSAGES[offer.msg].benefit === seg.benefit) um += .5;
+    let stig = 0;
+    if (offer.kind === 'p1') {
+      if (offer.msg === 'price') stig -= seg.stigma;
+      if (offer.price < 7000) stig -= seg.stigma * .4;
+    }
+    let eff, ux = 0;
+    if (offer.kind === 'waas') { eff = offer.fee * 30; ux = seg.sub + (SUBST[seg.id] * (SUBST_YEAR[year] || 0)) * .5; }
+    else eff = offer.price * (1 - (offer.emi ? seg.emi : 0));
+    const up = -seg.sens * eff / seg.wtp;
+    return { ua, um, stig, up, ux, eff, total: .8 + ua + um + stig + up + ux };
+  }
+
+  function initState(config) {
+    const teams = config.teams.map((t, i) => ({ ...t, idx: i }));
+    const ts = {};
+    teams.forEach(t => ts[t.id] = { cash: config.startCash, aw: 0, base: 0, waasBase: 0, attrs: [0, 0, 0, 0, 0, 0], dealer: [false, false, false], waasReady: false, waasStarted: null, waasLaunch: null, cumProfit: 0 });
+    const pools = {}; SEGS.forEach(s => pools[s.id] = { remaining: s.size, adopted: 0 });
+    return { config: { ...config, teams }, year: 1, done: false, K: .12, kano: clone(KANO0), kanoHistory: { 1: clone(KANO0) }, pools, ts, decisions: { 1: {} }, results: [], drift: { 1: [] } };
+  }
+
+  function defaultDecision(state, teamId) {
+    const prev = state.decisions[state.year - 1] && state.decisions[state.year - 1][teamId];
+    if (prev) { const d = clone(prev); d.research = { kano: [], market: false }; d.waasInvest = false; d.submitted = false; return d; }
+    return { attrs: [2, 1, 1, 0, 0, 1], price: 11000, emi: false, msg: 'health', adv: 2, edu: 2, cov: [1, 1, 0], research: { kano: [], market: false }, waasInvest: false, waasFee: 349, waasOn: true, submitted: false };
+  }
+
+  function marketMaxLevels(state) {
+    // highest level of each attribute offered on the market last year (for imitation discount)
+    const last = state.results[state.results.length - 1];
+    if (!last) return [-1, -1, -1, -1, -1, -1];
+    const mx = [-1, -1, -1, -1, -1, -1];
+    Object.values(last.teams).forEach(r => { if (r.active) r.attrs.forEach((l, i) => mx[i] = Math.max(mx[i], l)); });
+    return mx;
+  }
+  function rdCost(state, teamId, attrs) {
+    const cur = state.ts[teamId].attrs; const mx = marketMaxLevels(state);
+    let c = 0, saved = 0;
+    attrs.forEach((l, i) => { for (let k = cur[i] + 1; k <= l; k++) { const full = STEP_COST[k]; const disc = (state.year > 1 && k <= mx[i]) ? .5 : 1; c += full * disc; saved += full * (1 - disc); } });
+    return { cost: c, saved };
+  }
+  function distCost(state, teamId, cov) {
+    let c = 0; cov.forEach((l, t) => { c += DIST_COST[t][l]; if (l === 2 && !state.ts[teamId].dealer[t]) c += DEALER_SETUP; });
+    return c;
+  }
+  function researchCost(d) { return (d.research.kano.length * KANO_COST) + (d.research.market ? MARKET_COST : 0); }
+  function fixedSpend(state, teamId, d) {
+    const rd = rdCost(state, teamId, d.attrs).cost;
+    const dist = distCost(state, teamId, d.cov);
+    const res = researchCost(d);
+    const waas = d.waasInvest ? WAAS_RD : 0;
+    return { rd, dist, res, waas, adv: d.adv, edu: d.edu, overhead: OVERHEAD, total: rd + dist + res + waas + d.adv + d.edu + OVERHEAD };
+  }
+  function isActive(state, team) { return (team.entry || 1) <= state.year; }
+
+  function inMarket(state) {
+    // households considering a purchase this year, per segment
+    const out = {};
+    SEGS.forEach(s => {
+      const p = state.pools[s.id];
+      let proof = 1;
+      if (s.prev) { const pp = state.pools[s.prev]; const pen = pp.adopted / SEGS.find(x => x.id === s.prev).size; proof = Math.min(1, s.floor + (1 - s.floor) * pen / s.thr); }
+      out[s.id] = { n: p.remaining * s.ready * state.K * proof, proof, pen: p.adopted / s.size };
+    });
+    return out;
+  }
+
+  function runYear(state0) {
+    const state = clone(state0);
+    const y = state.year;
+    const teams = state.config.teams.filter(t => isActive(state, t));
+    const dec = {};
+    teams.forEach(t => dec[t.id] = state.decisions[y][t.id] || defaultDecision(state, t.id));
+    // --- category knowledge (public good) ---
+    const totalBase = Object.values(state.ts).reduce((s, x) => s + x.base + x.waasBase, 0);
+    const E = teams.reduce((s, t) => s + dec[t.id].edu, 0) + totalBase / 100000;
+    const Kprev = state.K;
+    state.K = state.K + (1 - state.K) * (1 - Math.exp(-E / 8));
+    // --- awareness ---
+    teams.forEach(t => {
+      const s = state.ts[t.id], d = dec[t.id];
+      let aw = s.aw * .65; aw = aw + (1 - aw) * (1 - Math.exp(-d.adv / 5));
+      aw = aw + (1 - aw) * .4 * Math.min(1, (s.base + s.waasBase) / 250000);
+      s.aw = aw;
+    });
+    // --- offers ---
+    const offers = [];
+    teams.forEach(t => {
+      const d = dec[t.id], s = state.ts[t.id];
+      offers.push({ team: t.id, kind: 'p1', attrs: d.attrs, price: d.price, emi: d.emi, msg: d.msg, cov: d.cov });
+      if (s.waasReady && d.waasOn) offers.push({ team: t.id, kind: 'waas', attrs: d.attrs, fee: d.waasFee, msg: d.msg, cov: d.cov });
+    });
+    // --- demand ---
+    const im = inMarket(state);
+    const sales = {}; offers.forEach((o, i) => sales[i] = { total: 0, bySeg: {} });
+    const segOut = {};
+    SEGS.forEach(seg => {
+      const kr = state.kano[seg.id];
+      const U0 = SUBST[seg.id] * (SUBST_YEAR[y] || 0);
+      let bought = 0;
+      seg.tiers.forEach((tw, ti) => {
+        const n = im[seg.id].n * tw;
+        const att = offers.map(o => { const c = state.ts[o.team].aw * COV[ti][o.cov[ti]]; return c * Math.exp(offerUtility(seg, kr, o, y).total); });
+        const den = Math.exp(U0) + att.reduce((a, b) => a + b, 0);
+        att.forEach((a, i) => { const q = n * a / den; sales[i].total += q; sales[i].bySeg[seg.id] = (sales[i].bySeg[seg.id] || 0) + q; bought += q; });
+      });
+      state.pools[seg.id].remaining -= bought; state.pools[seg.id].adopted += bought;
+      segOut[seg.id] = { inMarket: im[seg.id].n, bought, proof: im[seg.id].proof, penStart: im[seg.id].pen, pen: state.pools[seg.id].adopted / seg.size };
+    });
+    // --- financials ---
+    const res = { year: y, K: state.K, Kprev, teams: {}, segs: segOut, offers: [] };
+    const mx = marketMaxLevels(state0);
+    teams.forEach(t => {
+      const d = dec[t.id], s = state.ts[t.id];
+      const fx = fixedSpend(state0, t.id, d);
+      const rdInfo = rdCost(state0, t.id, d.attrs);
+      const i1 = offers.findIndex(o => o.team === t.id && o.kind === 'p1');
+      const iw = offers.findIndex(o => o.team === t.id && o.kind === 'waas');
+      const u1 = sales[i1].total, uc = unitCost(d.attrs);
+      const rev1 = u1 * d.price * NET / 1e7;
+      const cogs1 = u1 * uc / 1e7;
+      const emiCost = d.emi ? rev1 * .06 : 0;
+      const filterMargin = s.base * [700, 550, 400, 250][d.attrs[2]] / 1e7;
+      let uw = 0, revW = 0, costW = 0;
+      if (iw >= 0) {
+        uw = sales[iw].total;
+        const active = s.waasBase * .88;
+        revW = (active * d.waasFee * 12 + uw * d.waasFee * 6) / 1e7;
+        costW = (uw * uc + (active + uw * .5) * 600) / 1e7;
+        s.waasBase = active + uw;
+      } else if (s.waasBase) { s.waasBase *= .88; }
+      s.base += u1;
+      const p1Gross = rev1 - cogs1 - emiCost + filterMargin;
+      const wGross = revW - costW;
+      const shared = fx.adv + fx.edu + fx.dist + fx.res + fx.overhead;
+      const revTot = rev1 + filterMargin + revW;
+      const shareW = revTot > 0 ? revW / revTot : 0;
+      const p1Profit = p1Gross - fx.rd - shared * (1 - shareW);
+      const wProfit = (iw >= 0 || s.waasStarted) ? wGross - fx.waas - shared * shareW : null;
+      const interest = s.cash < 0 ? -s.cash * INTEREST : 0;
+      const profit = p1Gross + wGross - fx.total - interest;
+      s.cash += profit; s.cumProfit += profit;
+      d.cov.forEach((l, ti) => { if (l === 2) s.dealer[ti] = true; });
+      s.attrs = d.attrs.slice();
+      if (d.waasInvest && !s.waasStarted) { s.waasStarted = y; }
+      const wasReady = s.waasReady;
+      if (s.waasStarted && s.waasStarted < y + 1) s.waasReady = true; // ready next year
+      // 4As diagnostic (demand-weighted on segments in market)
+      const wts = SEGS.map(sg => segOut[sg.id].inMarket); const W = wts.reduce((a, b) => a + b, 0) || 1;
+      let acc = 0, aff = 0, accs = 0;
+      SEGS.forEach((sg, k) => {
+        const u = offerUtility(sg, state.kano[sg.id], offers[i1], y);
+        acc += wts[k] / W * logistic(u.ua + u.um + u.stig + .5);
+        aff += wts[k] / W * Math.min(1, sg.wtp / u.eff);
+        accs += wts[k] / W * sg.tiers.reduce((a, tw, ti) => a + tw * COV[ti][d.cov[ti]], 0);
+      });
+      const awa = Math.sqrt(s.aw * state.K);
+      res.teams[t.id] = {
+        active: true, attrs: d.attrs.slice(), price: d.price, emi: d.emi, msg: d.msg, cov: d.cov.slice(), adv: d.adv, edu: d.edu,
+        units: u1, unitsW: uw, bySeg: sales[i1].bySeg, bySegW: iw >= 0 ? sales[iw].bySeg : {}, unitCost: uc,
+        rev: rev1 + filterMargin + revW, rev1, filterMargin, revW, cogs: cogs1 + costW, emiCost, spend: fx, rdSaved: rdInfo.saved,
+        profit, interest, cash: s.cash, cumProfit: s.cumProfit, aw: s.aw, base: s.base, waasBase: s.waasBase, waasLive: iw >= 0, waasFee: d.waasFee,
+        products: { p1: { units: u1, profit: p1Profit }, waas: wProfit === null ? null : { units: uw, profit: wProfit } },
+        fourA: { acceptability: acc * 100, affordability: aff * 100, accessibility: accs * 100, awareness: awa * 100 },
+        waasJustReady: !wasReady && s.waasReady,
+      };
+    });
+    state.config.teams.filter(t => !isActive(state, t)).forEach(t => res.teams[t.id] = { active: false, cash: state.ts[t.id].cash, cumProfit: 0, units: 0, unitsW: 0, profit: 0 });
+    // market totals and shares
+    const tot = Object.values(res.teams).reduce((a, r) => a + (r.units || 0) + (r.unitsW || 0), 0);
+    res.totalUnits = tot;
+    Object.values(res.teams).forEach(r => r.share = tot ? ((r.units || 0) + (r.unitsW || 0)) / tot : 0);
+    // market standard per attribute (sales-weighted), used for Kano drift + PoP/PoD
+    const S = [0, 0, 0, 0, 0, 0];
+    teams.forEach(t => { const r = res.teams[t.id]; const w = tot ? (r.units + r.unitsW) / tot : 1 / teams.length; r.attrs.forEach((l, i) => S[i] += w * l); });
+    res.standard = S;
+    const med = ATTRS.map((_, i) => { const v = teams.map(t => res.teams[t.id].attrs[i]).sort((a, b) => a - b); return v[Math.floor((v.length - 1) / 2)]; });
+    res.median = med;
+    // PLC stage of the category
+    const prevTot = state0.results.length ? state0.results[state0.results.length - 1].totalUnits : 0;
+    const cumAdopt = SEGS.reduce((a, s) => a + state.pools[s.id].adopted, 0) / POTENTIAL;
+    const g = prevTot ? tot / prevTot - 1 : null;
+    res.growth = g; res.cumAdoption = cumAdopt;
+    res.stage = (y === 1 || cumAdopt < .03) ? 'Introduction' : g > .25 ? 'Growth' : g > -.15 ? 'Maturity' : 'Decline';
+    // portfolio classification per product (attractiveness = young or growing; profitability = positive product profit)
+    teams.forEach(t => {
+      const r = res.teams[t.id], s = state.ts[t.id]; const prevR = state0.results.length ? state0.results[state0.results.length - 1].teams[t.id] : null;
+      const cls = (units, prevUnits, profit, age) => {
+        const high = age <= 1 || (prevUnits > 0 && units / prevUnits - 1 >= .15);
+        const strong = profit > 0;
+        return high ? (strong ? 'Strategic' : 'Absorber') : (strong ? 'Contributor' : 'Dog');
+      };
+      r.products.p1.cls = cls(r.units, prevR && prevR.active ? prevR.units : 0, r.products.p1.profit, y - (t.entry || 1));
+      if (r.products.waas) {
+        if (r.waasLive && !s.waasLaunch) s.waasLaunch = y;
+        r.products.waas.cls = r.waasLive ? cls(r.unitsW, prevR && prevR.waasLive ? prevR.unitsW : 0, r.products.waas.profit, y - s.waasLaunch) : 'Absorber';
+      }
+    });
+    state.results.push(res);
+    state.decisions[y] = dec;
+    // --- advance year: Kano drift driven by competition ---
+    if (y >= YEARS) { state.done = true; return state; }
+    state.year = y + 1;
+    const changes = [];
+    SEGS.forEach(sg => {
+      state.kano[sg.id] = state.kano[sg.id].map((k, i) => {
+        const s = S[i]; let n = k;
+        if (k.t === 'E' && s >= 1.3) n = { t: 'P', w: +(k.w * .8).toFixed(2) };
+        else if (k.t === 'P' && s >= 2.2) n = { t: 'B', req: 2 };
+        else if (k.t === 'B' && k.req < 3 && s >= k.req + .8) n = { t: 'B', req: k.req + 1 };
+        else if (k.t === 'I' && s >= 2.0 && (i === 4 || i === 5 || i === 1)) n = { t: 'E', w: .3 };
+        if (n !== k) changes.push({ seg: sg.id, attr: i, from: k, to: n });
+        return n;
+      });
+    });
+    state.kanoHistory[state.year] = clone(state.kano);
+    state.drift[state.year] = changes;
+    state.decisions[state.year] = {};
+    return state;
+  }
+
+  function popPod(res, kano, teamId) {
+    const r = res.teams[teamId]; if (!r || !r.active) return null;
+    return ATTRS.map((a, i) => {
+      const m = res.median[i], l = r.attrs[i];
+      const types = SEGS.map(s => kano[s.id][i]);
+      const valued = types.some(k => k.t === 'P' || k.t === 'E');
+      const basicReq = Math.max(...types.map(k => k.t === 'B' ? k.req : 0));
+      let status;
+      if (basicReq && l < basicReq) status = 'Below basic';
+      else if (l > m) status = valued ? 'Point of difference' : 'Difference nobody values';
+      else if (l === m) status = 'Point of parity';
+      else status = 'Behind market';
+      return { attr: a.name, level: l, median: m, status };
+    });
+  }
+
+  return { YEARS, POTENTIAL, TIERS, COV, DIST_COST, DEALER_SETUP, OVERHEAD, STEP_COST, WAAS_RD, KANO_COST, MARKET_COST, SEGS, ATTRS, MESSAGES, KANO0, SUBST, SUBST_YEAR,
+    initState, defaultDecision, runYear, rdCost, distCost, fixedSpend, unitCost, inMarket, popPod, offerUtility, credible, clone, isActive, marketMaxLevels };
+})();
+if (typeof module !== 'undefined') module.exports = ENGINE;
+
+</script>
+<script>
+(() => {
+const E = ENGINE;
+const KEY = 'firstmove-v1';
+const COLORS = ['--t1','--t2','--t3','--t4','--t5','--t7','--t6'];
+const DEFAULT_NAMES = ['JalSutra','PureNest','Neerja','AquaVeda','Tarang','Boondh','Nirmal'];
+const EVENTS = {
+  1: { title: 'Year 1 — The category is born', text: 'Nobody in Tier 1–3 India buys a smart purifier yet. Most households boil water or use a basic carbon filter. You design the product and launch it.' },
+  2: { title: 'Year 2 — Teardowns everywhere', text: 'Competitors take each other’s products apart. Developing a feature level that is already on the shelf now costs 50% less.' },
+  3: { title: 'Year 3 — A radical option opens', text: 'Your engineers propose Water-as-a-Service: a purifier installed free, paid with a monthly fee that covers filters and service. Developing it costs ₹8 cr and it can launch next year.' },
+  4: { title: 'Year 4 — Substitutes arrive', text: 'Municipal piped-water programmes and coin-operated water ATMs open in many cities. Some households now see less reason to buy a purifier.' },
+  5: { title: 'Year 5 — Substitutes spread', text: 'Water ATMs reach small towns. The cheapest households have a real alternative to buying any purifier.' },
+};
+const STAGE_NOTE = { Introduction: 'Few buyers, high market risk. Build awareness and knowledge.', Growth: 'Imitators enter. Differentiate, expand distribution.', Maturity: 'Fierce competition. Defend, optimise, consider radical innovation.', Decline: 'Substitutes and saturation. Harvest, downsize or reinvent.' };
+
+let G = null;         // game state (engine)
+let SNAP = [];        // snapshots for undo
+let UI = { tab: 'setup', team: null, deskOpen: false, confirm: null, setup: null };
+
+// ---------- storage ----------
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({G, SNAP, UI:{tab:UI.tab}})); }catch(e){} }
+function load(){ try{ const s = JSON.parse(localStorage.getItem(KEY)||'null'); if(s && s.G){ G=s.G; SNAP=s.SNAP||[]; UI.tab = s.UI && s.UI.tab || 'board'; } }catch(e){} }
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cr = v => (v<0?'−':'') + '₹' + Math.abs(v).toFixed(1) + ' cr';
+const rs = v => '₹' + Math.round(v).toLocaleString('en-IN');
+const k = v => v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v >= 1000 ? (v/1000).toFixed(v>=1e5?0:1)+'k' : Math.round(v).toString();
+const pct = v => (v*100).toFixed(0)+'%';
+const col = t => `var(${COLORS[t.idx % COLORS.length]})`;
+const teamById = id => G.config.teams.find(t => t.id === id);
+const lastRes = () => G.results[G.results.length-1];
+function toast(msg){ const d=document.createElement('div'); d.className='toast'; d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
+
+// ---------- chrome ----------
+function renderChrome(){
+  const rail = $('#rail'); const tabs = $('#tabs');
+  if(!G){ rail.innerHTML=''; tabs.innerHTML=''; return; }
+  let r='';
+  for(let y=1;y<=E.YEARS;y++){
+    const done = G.results.length >= y; const now = !G.done && G.year===y;
+    r += `<span class="yr ${done?'done':''} ${now?'now':''}" title="${done?G.results[y-1].stage:''}">Y${y}${done?' ✓':''}</span>`;
+  }
+  rail.innerHTML = r;
+  const T = [['brief','Briefing'],['desk','Team desk'],['board','Market board'],['debrief','Debrief'],['host','Facilitator']];
+  tabs.innerHTML = T.map(([id,l])=>`<button class="tab" data-tab="${id}" aria-current="${UI.tab===id}">${l}</button>`).join('');
+}
+
+function render(){
+  renderChrome();
+  const app = $('#app');
+  if(!G){ app.innerHTML = viewSetup(); bindSetup(); return; }
+  const v = { brief: viewBrief, desk: viewDesk, board: viewBoard, debrief: viewDebrief, host: viewHost }[UI.tab] || viewBoard;
+  app.innerHTML = v();
+  if(UI.tab==='desk') bindDesk();
+  if(UI.tab==='host') bindHost();
+}
+
+// ---------- SETUP ----------
+function viewSetup(){
+  if(!UI.setup) UI.setup = { n:5, names: DEFAULT_NAMES.slice(), cash:40, late:[] };
+  const s = UI.setup;
+  let rows='';
+  for(let i=0;i<s.n;i++){
+    rows += `<div class="team-edit"><span class="dot" style="background:var(${COLORS[i]});width:14px;height:14px"></span>
+      <input type="text" id="tn${i}" value="${esc(s.names[i])}" aria-label="Team ${i+1} name">
+      <label class="cb"><input type="checkbox" id="tl${i}" ${s.late.includes(i)?'checked':''}> enters in Year 2</label></div>`;
+  }
+  return `<section class="hero">
+    <div class="eyebrow">SDA Bocconi Asia Center · Marketing &amp; Customer Centricity · Product management</div>
+    <h1>Launch a purifier into a market that doesn’t exist yet.</h1>
+    <p>Teams run competing companies launching smart home water purifiers in India over five years. They design the product, pick a target, set price, channels and communication, and then live with what customers, imitators and substitutes do to them.</p>
+  </section>
+  <div class="grid g2">
+    <div class="panel stack">
+      <h3>Teams</h3>
+      <div class="slider"><span class="small ink2">Number of teams</span><input type="range" id="sn" min="3" max="7" value="${s.n}"><output>${s.n}</output></div>
+      ${rows}
+      <p class="small muted">Late entrants sit out Year 1 and start as followers: they watch the pioneers and get the 50% imitation discount on R&amp;D from day one.</p>
+    </div>
+    <div class="panel stack">
+      <h3>Session</h3>
+      <div class="slider"><span class="small ink2">Starting cash</span><input type="range" id="sc" min="20" max="80" step="5" value="${s.cash}"><output>₹${s.cash} cr</output></div>
+      <table class="small"><tr><th>Block</th><th class="r">Minutes</th></tr>
+        <tr><td>Briefing (project the Briefing tab)</td><td class="r num">10</td></tr>
+        <tr><td>Year 1: design and launch</td><td class="r num">15</td></tr>
+        <tr><td>Years 2–5: about 8 minutes each</td><td class="r num">35</td></tr>
+        <tr><td>Debrief, bridge to the TATA Nano case</td><td class="r num">25</td></tr>
+        <tr><td>Buffer</td><td class="r num">5</td></tr></table>
+      <p class="small muted">One laptop runs the game. Teams come to it in turn (Team desk), see their private report and enter decisions. The Market board is the public screen for the projector. With 6–7 teams, ask each team to agree its decisions at the table first and come to the laptop only to type them in (about a minute per team).</p>
+      <button class="btn primary" id="start">Start the game</button>
+    </div>
+  </div>`;
+}
+function bindSetup(){
+  const s = UI.setup;
+  const sync = () => { for(let i=0;i<s.n;i++){ const n=$('#tn'+i); if(n) s.names[i]=n.value; } s.late = []; for(let i=0;i<s.n;i++){ if($('#tl'+i)?.checked) s.late.push(i); } };
+  $('#sn').oninput = e => { sync(); s.n=+e.target.value; render(); };
+  $('#sc').oninput = e => { s.cash=+e.target.value; e.target.nextElementSibling.textContent='₹'+s.cash+' cr'; };
+  $('#start').onclick = () => {
+    sync();
+    if(s.late.length >= s.n){ toast('At least one team must launch in Year 1'); return; }
+    const teams = []; for(let i=0;i<s.n;i++) teams.push({ id:'T'+(i+1), name:(s.names[i]||'Team '+(i+1)).trim().slice(0,24), entry: s.late.includes(i)?2:1 });
+    G = E.initState({ teams, startCash: s.cash }); SNAP=[]; UI.tab='brief'; save(); render();
+  };
+}
+
+// ---------- BRIEFING ----------
+function viewBrief(){
+  const ev = EVENTS[G.done?5:G.year];
+  const segs = E.SEGS.map(s=>`<div class="panel stack" style="gap:6px">
+     <div class="spread"><h3>${s.name}</h3><span class="eyebrow num">${(s.share*100).toFixed(1)}% · ${k(s.size)} HH</span></div>
+     <p class="small ink2">${s.blurb}</p>
+     <p class="small muted">Live in: ${s.tiers.map((t,i)=>`${['Metros','Tier 2','Tier 3'][i]} ${pct(t)}`).join(' · ')}</p></div>`).join('');
+  const chain = E.ATTRS.map(a=>`<tr><td><b>${a.name}</b><br><span class="small muted">${a.levels.join(' → ')}</span></td><td>${a.perf}</td><td>${a.benefit}</td><td class="r num small">+${rs(a.cost[1])} … +${rs(a.cost[3])}</td></tr>`).join('');
+  return `<div class="stack" style="gap:20px">
+  <div class="banner"><b>${ev.title}.</b> ${ev.text}</div>
+  <section class="grid g2">
+    <div class="stack">
+      <div class="eyebrow">The case</div>
+      <h2>Smart water purifiers for India’s next 100 cities</h2>
+      <p class="ink2">About 3 million households in Tier 1, 2 and 3 cities could afford a home purifier, but almost none owns a modern one. Water quality is a daily worry; boiling is the default. Your company has the technology. You have five years to build the category and a profitable business inside it.</p>
+      <p class="ink2">Each year your team decides <b>what the product is</b> (six attributes), <b>who it is for</b> and <b>what you say</b> (positioning), <b>the price</b> and whether to offer EMI instalments, <b>where it is sold</b> (online only, or dealers too, by city tier) and <b>how much you spend</b> on brand advertising and on category education (water-testing camps, demos).</p>
+      <p class="ink2">You win on <b>cumulative profit</b> after Year 5. Running out of cash is allowed but you pay 12% interest on the overdraft.</p>
+    </div>
+    <div class="panel stack">
+      <h3>Rules of thumb</h3>
+      <ul class="small ink2" style="margin:0;padding-left:18px;display:grid;gap:6px">
+        <li>Customers buy benefits, not features. A feature counts only if your target links it to something they want.</li>
+        <li>Brand advertising makes people know <i>your</i> brand. Category education makes people understand <i>why</i> to buy a purifier at all, and it helps every competitor.</li>
+        <li>People buy when people like them have already bought. Some segments won’t move until the segment before them has adopted.</li>
+        <li>Your positioning message must be backed by the product. Claims you can’t support cost you credibility.</li>
+        <li>What surprises customers today they will expect tomorrow.</li>
+        <li>Market research is for sale on the Team desk: a Kano study per segment (₹0.5 cr) and a market report (₹0.4 cr).</li>
+      </ul>
+    </div>
+  </section>
+  <section class="stack">
+    <div class="eyebrow">Customer value chain</div>
+    <h2>From what the product is, to what it does, to what customers get</h2>
+    <div class="panel scroll"><table><tr><th>Characteristic (levels 0 → 3)</th><th>Performance</th><th>Benefit</th><th class="r">Unit cost added</th></tr>${chain}
+      <tr><td colspan="4" class="small muted">Base unit cost ${rs(3500)}. Developing a level costs ₹1 / 2 / 3.5 cr for levels 1 / 2 / 3 (one-off). Dealers and online platforms keep 22% of the shelf price.</td></tr></table></div>
+  </section>
+  <section class="stack">
+    <div class="eyebrow">Who is out there</div>
+    <h2>Five kinds of households</h2>
+    <div class="grid g3">${segs}</div>
+  </section></div>`;
+}
+
+// ---------- TEAM DESK ----------
+function getDec(tid){
+  const y = G.year;
+  if(!G.decisions[y]) G.decisions[y] = {};
+  if(!G.decisions[y][tid]) G.decisions[y][tid] = E.defaultDecision(G, tid);
+  return G.decisions[y][tid];
+}
+function viewDesk(){
+  if(G.done) return `<div class="panel privacy"><h2>The game is over</h2><p class="ink2">All five years have run. Open the Debrief.</p><button class="btn primary" data-tab="debrief">Open the debrief</button></div>`;
+  const teams = G.config.teams;
+  const bar = teams.map(t=>{ const act=E.isActive(G,t); const d=G.decisions[G.year][t.id]; const ok = d && d.submitted;
+    return `<button class="tpick" data-team="${t.id}" aria-pressed="${UI.team===t.id && UI.deskOpen}"><span class="dot" style="background:${col(t)}"></span>${esc(t.name)} <span class="st ${ok?'ok':''}">${!act?'enters Y'+t.entry:ok?'submitted':'open'}</span></button>`; }).join('');
+  let body;
+  if(!UI.deskOpen || !UI.team){
+    body = `<div class="panel privacy"><div class="eyebrow">Year ${G.year} · private desk</div><h2>Team, pick your company</h2><p class="ink2" style="max-width:52ch">Your report and decisions are private. When you’re done, press Submit and the desk closes for the next team.</p></div>`;
+  } else {
+    const t = teamById(UI.team);
+    if(!E.isActive(G,t)) body = `<div class="panel privacy"><h2>${esc(t.name)} enters in Year ${t.entry}</h2><p class="ink2" style="max-width:56ch">You are a follower. Watch the pioneers on the Market board: which features sell, which prices hold, which segments move. In Year ${t.entry} anything already on the shelf will cost you half to develop.</p><button class="btn" id="closeDesk">Close desk</button></div>`;
+    else body = deskTeam(t);
+  }
+  return `<div class="stack" style="gap:16px"><div class="spread"><h2>Team desk · Year ${G.year}</h2><span class="muted small">${EVENTS[G.year].title}</span></div><div class="teambar">${bar}</div>${body}</div>`;
+}
+
+function deskTeam(t){
+  const d = getDec(t.id); const y = G.year; const ts = G.ts[t.id];
+  const prev = lastRes(); const pr = prev && prev.teams[t.id];
+  // ----- left: report -----
+  let rep = '';
+  if(!pr || !pr.active){
+    rep += `<div class="panel stack"><h3>Your starting position</h3><div class="ledger"><span>Cash</span><b class="num">${cr(ts.cash)}</b><span>Customers</span><b class="num">0</b></div><p class="small ink2">No product, no brand. Your first decisions define the product and the launch.</p></div>`;
+  } else {
+    const fa = pr.fourA; const low = Object.entries(fa).sort((a,b)=>a[1]-b[1])[0][0];
+    rep += `<div class="panel stack"><div class="spread"><h3>Year ${prev.year} results</h3><span class="chip ${pr.profit>=0?'good':'bad'}">${pr.profit>=0?'Profit':'Loss'} ${cr(pr.profit)}</span></div>
+      <div class="ledger num">
+        <span>Units sold (purifier)</span><b>${k(pr.units)}</b>
+        ${pr.waasLive?`<span>New subscribers (WaaS)</span><b>${k(pr.unitsW)}</b>`:''}
+        <span>Market share</span><b>${pct(pr.share)}</b>
+        <span>Revenue (incl. filters${pr.waasLive?', fees':''})</span><b>${cr(pr.rev)}</b>
+        <span>Cost of goods</span><b>${cr(-pr.cogs)}</b>
+        <span>R&amp;D</span><b>${cr(-(pr.spend.rd+pr.spend.waas))}</b>
+        <span>Marketing, channels, research, overhead</span><b>${cr(-(pr.spend.adv+pr.spend.edu+pr.spend.dist+pr.spend.res+pr.spend.overhead+pr.emiCost))}</b>
+        ${pr.interest?`<span>Overdraft interest</span><b>${cr(-pr.interest)}</b>`:''}
+        <span class="tot">Cash now</span><b class="tot">${cr(ts.cash)}</b>
+      </div>
+      <div class="small ink2">Sales by segment: ${E.SEGS.map(s=>`${s.name} <b class="num">${k((pr.bySeg[s.id]||0)+(pr.bySegW[s.id]||0))}</b>`).join(' · ')}</div>
+    </div>
+    <div class="panel stack"><div class="spread"><h3>Your launch through the 4 As</h3><span class="small muted">weighted on buyers in the market</span></div>${fourABars(fa)}
+      <p class="small ink2">Weakest: <b>${low[0].toUpperCase()+low.slice(1)}</b>. ${faHint(low)}</p></div>
+    <div class="panel stack"><h3>Parity and difference vs. the shelf</h3>${popTable(prev, t.id)}</div>`;
+  }
+  // research results
+  const kano = G.kano; let resHtml='';
+  if(d.research.kano.length){
+    resHtml += `<div class="stack"><div class="legend"><span><i class="k-B"></i>Basic (min. level)</span><span><i class="k-P"></i>Performance</span><span><i class="k-E"></i>Excitement</span><span><i class="k-I"></i>Indifferent</span></div>
+    <div class="scroll"><table class="small"><tr><th>Segment</th>${E.ATTRS.map(a=>`<th>${a.name}</th>`).join('')}</tr>
+    ${d.research.kano.map(sid=>`<tr><td><b>${E.SEGS.find(s=>s.id===sid).name}</b></td>${kano[sid].map(kc=>`<td><span class="kcell k-${kc.t}" style="display:block">${kc.t==='B'?'Basic ≥'+kc.req:kc.t==='P'?'Perf.':kc.t==='E'?'Excite':'Indiff.'}</span></td>`).join('')}</tr>`).join('')}</table></div></div>`;
+  }
+  if(d.research.market){
+    const im = E.inMarket(G);
+    resHtml += `<div class="scroll"><table class="small"><tr><th>Segment</th><th class="r">Households</th><th class="r">Already own</th><th class="r">Shopping this year</th><th class="r">Typical WTP</th><th class="r">EMI matters</th></tr>
+    ${E.SEGS.map(s=>`<tr><td>${s.name}</td><td class="r num">${k(s.size)}</td><td class="r num">${pct(im[s.id].pen)}</td><td class="r num">~${k(im[s.id].n)}</td><td class="r num">${rs(s.wtp)}</td><td class="r">${s.emi>=.2?'a lot':s.emi>=.1?'somewhat':'no'}</td></tr>`).join('')}</table></div>
+    <p class="small muted">“Shopping this year” already reflects category knowledge (${pct(G.K)} last year) and how far the previous segment has adopted.</p>`;
+  }
+  rep += `<div class="panel stack"><h3>Market research</h3>
+    <p class="small ink2">Kano study: how one segment classifies each attribute right now. ₹${E.KANO_COST} cr each.</p>
+    <div class="row">${E.SEGS.map(s=>{ const on=d.research.kano.includes(s.id); return `<button class="btn ${on?'aqua':''}" data-kano="${s.id}">${on?'✓ ':''}${s.name}</button>`; }).join('')}</div>
+    <div class="row"><button class="btn ${d.research.market?'aqua':''}" data-mkt="1">${d.research.market?'✓ ':''}Market report · ₹${E.MARKET_COST} cr</button><span class="small muted">sizes, penetration, willingness to pay</span></div>
+    ${resHtml}</div>`;
+
+  // ----- right: decisions -----
+  const cur = ts.attrs;
+  const attrsHtml = E.ATTRS.map((a,i)=>`<div class="attr-row"><div class="attr-name"><b>${a.name}</b><span>${a.benefit}</span></div>
+     <div class="seg" role="group" aria-label="${a.name}">${a.levels.map((lv,l)=>`<button data-attr="${i}" data-lvl="${l}" aria-pressed="${d.attrs[i]===l}">${lv}${pr&&pr.active&&cur[i]===l&&l!==d.attrs[i]?'<br><span class="cur">current</span>':''}</button>`).join('')}</div></div>`).join('');
+  const msgHtml = Object.entries(E.MESSAGES).map(([kk,m])=>`<button data-msg="${kk}" aria-pressed="${d.msg===kk}">${m.label}</button>`).join('');
+  const covHtml = E.TIERS.map((tn,ti)=>`<div class="attr-row"><div class="attr-name"><b>${tn}</b><span>${ts.dealer[ti]?'dealer network in place':'dealers: ₹'+E.DEALER_SETUP+' cr set-up'}</span></div>
+     <div class="seg c3">${['Not sold','Online only','Online + dealers'].map((l,lv)=>`<button data-cov="${ti}" data-lvl="${lv}" aria-pressed="${d.cov[ti]===lv}">${l}<br><span class="cur" style="color:var(--muted)">₹${E.DIST_COST[ti][lv]} cr/yr</span></button>`).join('')}</div></div>`).join('');
+  let waas = '';
+  if(y>=3 || ts.waasStarted){
+    if(ts.waasReady){
+      waas = `<div class="dec-sec"><h4>Water-as-a-Service <span class="tag">radical innovation · live</span></h4>
+        <label class="cb"><input type="checkbox" id="waasOn" ${d.waasOn?'checked':''}> Offer the subscription this year (uses your current product attributes, channels and message)</label>
+        <div class="slider"><span class="small ink2">Monthly fee</span><input type="range" id="waasFee" min="199" max="799" step="25" value="${d.waasFee}"><output>${rs(d.waasFee)}/mo</output></div>
+        <p class="small muted">You pay for the hardware when a customer signs up; fees come in every year. Service costs ₹600 per subscriber per year; about 12% cancel each year.</p></div>`;
+    } else if(ts.waasStarted){
+      waas = `<div class="dec-sec"><h4>Water-as-a-Service <span class="tag">in development</span></h4><p class="small ink2">Ready to launch next year.</p></div>`;
+    } else {
+      waas = `<div class="dec-sec"><h4>Water-as-a-Service <span class="tag">radical innovation</span></h4>
+        <label class="cb"><input type="checkbox" id="waasInv" ${d.waasInvest?'checked':''}> Invest ₹${E.WAAS_RD} cr this year to develop it (launch next year)</label>
+        <p class="small muted">A second product: free installation, a monthly fee covering filters and service. It starts a new life cycle next to your current purifier.</p></div>`;
+    }
+  }
+  const right = `<div class="panel stack">
+    <div class="dec-sec"><h4>Product <span class="tag">acceptability · Kano</span></h4>${attrsHtml}</div>
+    <div class="dec-sec"><h4>Positioning message <span class="tag">STP</span></h4><div class="seg c4w">${msgHtml}</div></div>
+    <div class="dec-sec"><h4>Price <span class="tag">affordability</span></h4>
+      <div class="slider"><span class="small ink2">Shelf price</span><input type="range" id="price" min="4000" max="22000" step="250" value="${d.price}"><output>${rs(d.price)}</output></div>
+      <label class="cb"><input type="checkbox" id="emi" ${d.emi?'checked':''}> Offer EMI instalments (costs 6% of purifier revenue)</label></div>
+    <div class="dec-sec"><h4>Distribution <span class="tag">accessibility</span></h4>${covHtml}</div>
+    <div class="dec-sec"><h4>Communication <span class="tag">awareness &amp; knowledge</span></h4>
+      <div class="slider"><span class="small ink2">Brand advertising</span><input type="range" id="adv" min="0" max="10" step="0.5" value="${d.adv}"><output>₹${d.adv} cr</output></div>
+      <div class="slider"><span class="small ink2">Category education</span><input type="range" id="edu" min="0" max="10" step="0.5" value="${d.edu}"><output>₹${d.edu} cr</output></div>
+      <p class="small muted">Education builds understanding of the whole category: every competitor benefits.</p></div>
+    ${waas}
+  </div>`;
+  return `<div class="desk">
+    <div class="stack">${rep}</div>
+    <div class="stack"><div class="spread"><div class="row"><span class="dot" style="background:${col(t)};width:14px;height:14px"></span><h2>${esc(t.name)}</h2></div><button class="btn" id="closeDesk">Close without submitting</button></div>
+      <div class="preview panel stack" id="preview"></div>
+      ${right}
+      <button class="btn primary" id="submit" style="padding:12px">Submit Year ${y} decisions</button>
+    </div></div>`;
+}
+function fourABars(fa){
+  const ent = Object.entries(fa); const min = Math.min(...ent.map(e=>e[1]));
+  return `<div class="fa">${ent.map(([n,v])=>`<div class="fa-row ${v===min?'low':''}"><b>${n[0].toUpperCase()+n.slice(1)}</b><div class="fa-track"><div class="fa-fill" style="width:${Math.max(2,Math.min(100,v)).toFixed(0)}%"></div></div><span class="num r">${v.toFixed(0)}</span></div>`).join('')}</div>`;
+}
+function faHint(n){ return { acceptability:'Does the product, and its message, give the buyers in the market what they need? Check basic factors first.', affordability:'Your effective price is above what the buyers in the market are willing or able to pay. Price, EMI, or a different target.', accessibility:'Buyers can’t find you where they live. Look at which tiers your segments are in.', awareness:'Too few households know your brand, or understand the category.' }[n]; }
+function popTable(res, tid){
+  const rows = E.popPod(res, G.kanoHistory[res.year], tid); if(!rows) return '';
+  const cls = s => s==='Point of difference'?'good':s==='Point of parity'?'':s==='Below basic'?'bad':'warn';
+  return `<div class="scroll"><table class="small"><tr><th>Attribute</th><th class="r">You</th><th class="r">Shelf median</th><th>Status</th></tr>${rows.map(r=>`<tr><td>${r.attr}</td><td class="r num">${r.level}</td><td class="r num">${r.median}</td><td><span class="chip ${cls(r.status)}">${r.status}</span></td></tr>`).join('')}</table></div>`;
+}
+function renderPreview(){
+  const el = $('#preview'); if(!el) return; const t = teamById(UI.team); const d = getDec(t.id); const ts = G.ts[t.id];
+  const fx = E.fixedSpend(G, t.id, d); const rd = E.rdCost(G, t.id, d.attrs); const uc = E.unitCost(d.attrs);
+  const net = d.price*.78; const m = net - uc;
+  const cred = E.credible(d.msg, d.attrs, d.price);
+  el.innerHTML = `<div class="spread"><h3>This year’s commitments</h3><span class="chip ${ts.cash-fx.total>=0?'':'warn'}">Cash before sales ${cr(ts.cash - fx.total)}</span></div>
+   <div class="ledger num small">
+    <span>Unit cost</span><b>${rs(uc)}</b>
+    <span>You keep per unit (78% of shelf price) − cost</span><b style="color:${m>=0?'var(--good)':'var(--bad)'}">${rs(m)}</b>
+    <span>R&amp;D for new levels${rd.saved>0?` <span class="chip good">imitation saves ${cr(rd.saved)}</span>`:''}</span><b>${cr(fx.rd)}</b>
+    ${fx.waas?`<span>Water-as-a-Service development</span><b>${cr(fx.waas)}</b>`:''}
+    <span>Advertising + education</span><b>${cr(fx.adv+fx.edu)}</b>
+    <span>Distribution</span><b>${cr(fx.dist)}</b>
+    <span>Research</span><b>${cr(fx.res)}</b>
+    <span>Overhead</span><b>${cr(fx.overhead)}</b>
+    <span class="tot">Fixed spend this year</span><b class="tot">${cr(fx.total)}</b></div>
+   ${!cred?`<div class="banner warn small">Your product doesn’t back up the message “${E.MESSAGES[d.msg].label}”. Customers will notice.</div>`:''}`;
+}
+function bindDesk(){
+  document.querySelectorAll('[data-team]').forEach(b=>b.onclick=()=>{ UI.team=b.dataset.team; UI.deskOpen=true; render(); window.scrollTo(0,0); });
+  const cl = $('#closeDesk'); if(cl) cl.onclick=()=>{ UI.deskOpen=false; save(); render(); };
+  if(!UI.deskOpen || !UI.team || !E.isActive(G,teamById(UI.team))) return;
+  const d = getDec(UI.team);
+  const upd = () => { d.submitted=false; save(); renderPreview(); };
+  document.querySelectorAll('[data-attr]').forEach(b=>b.onclick=()=>{ d.attrs[+b.dataset.attr]=+b.dataset.lvl; b.parentElement.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b)); upd(); });
+  document.querySelectorAll('[data-msg]').forEach(b=>b.onclick=()=>{ d.msg=b.dataset.msg; b.parentElement.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b)); upd(); });
+  document.querySelectorAll('[data-cov]').forEach(b=>b.onclick=()=>{ d.cov[+b.dataset.cov]=+b.dataset.lvl; b.parentElement.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b)); upd(); });
+  const rng = (id, key, fmt) => { const el=$('#'+id); if(!el) return; el.oninput=()=>{ d[key]=+el.value; el.nextElementSibling.textContent=fmt(+el.value); upd(); }; };
+  rng('price','price',rs); rng('adv','adv',v=>'₹'+v+' cr'); rng('edu','edu',v=>'₹'+v+' cr'); rng('waasFee','waasFee',v=>rs(v)+'/mo');
+  const cb = (id,key) => { const el=$('#'+id); if(el) el.onchange=()=>{ d[key]=el.checked; upd(); }; };
+  cb('emi','emi'); cb('waasOn','waasOn'); cb('waasInv','waasInvest');
+  document.querySelectorAll('[data-kano]').forEach(b=>b.onclick=()=>{ const s=b.dataset.kano; const i=d.research.kano.indexOf(s); if(i>=0) d.research.kano.splice(i,1); else d.research.kano.push(s); d.submitted=false; save(); const y=scrollY; render(); scrollTo(0,y); });
+  const mk = $('[data-mkt]'); if(mk) mk.onclick=()=>{ d.research.market=!d.research.market; d.submitted=false; save(); const y=scrollY; render(); scrollTo(0,y); };
+  $('#submit').onclick = () => { d.submitted = true; UI.deskOpen=false; save(); render(); window.scrollTo(0,0); toast(teamById(UI.team).name+' submitted'); };
+  renderPreview();
+}
+
+// ---------- CHARTS ----------
+function niceMax(v){ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v))); const n=v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+function stackedBars(series, labels, fmt, h=260){
+  // series: [{name,color,values[]}]
+  const W=640,H=h,ml=52,mr=10,mt=12,mb=28; const n=labels.length;
+  const tots = labels.map((_,i)=>series.reduce((a,s)=>a+(s.values[i]||0),0));
+  const max = niceMax(Math.max(...tots,1)); const bw=(W-ml-mr)/n; const bar=Math.min(64,bw*.56);
+  const yv = v => mt+(H-mt-mb)*(1-v/max);
+  let g=''; for(let i=0;i<=4;i++){ const v=max*i/4; g+=`<line class="gl" x1="${ml}" x2="${W-mr}" y1="${yv(v)}" y2="${yv(v)}"/><text x="${ml-6}" y="${yv(v)+4}" text-anchor="end">${fmt(v)}</text>`; }
+  let b='';
+  labels.forEach((l,i)=>{ let acc=0; const x=ml+bw*i+(bw-bar)/2;
+    series.forEach((s,si)=>{ const v=s.values[i]||0; if(v<=0) return; const y0=yv(acc), y1=yv(acc+v); acc+=v; const hh=Math.max(0,y0-y1-2);
+      b+=`<rect x="${x}" y="${y1}" width="${bar}" height="${hh}" rx="2" fill="${s.color}" data-tip="${esc(s.name)} · ${esc(l)}: ${fmt(v)}"/>`; });
+    b+=`<text x="${x+bar/2}" y="${H-8}" text-anchor="middle">${esc(l)}</text>`;
+    if(tots[i]>0) b+=`<text x="${x+bar/2}" y="${yv(tots[i])-5}" text-anchor="middle" style="fill:var(--ink2)">${fmt(tots[i])}</text>`; });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}<line class="ax" x1="${ml}" x2="${W-mr}" y1="${yv(0)}" y2="${yv(0)}"/>${b}</svg>`;
+}
+function lines(series, labels, fmt, h=260, zero=true){
+  const W=640,H=h,ml=56,mr=90,mt=14,mb=28; const n=labels.length;
+  const all = series.flatMap(s=>s.values.filter(v=>v!=null));
+  let mx = Math.max(...all, 0), mn = Math.min(...all, 0);
+  const step = niceMax(Math.max(mx-mn, 1)/4); mx = Math.ceil(mx/step)*step || step; mn = Math.floor(mn/step)*step;
+  const xv = i => ml + (n<=1?0:(W-ml-mr)*i/(n-1)); const yv = v => mt+(H-mt-mb)*(1-(v-mn)/((mx-mn)||1));
+  let g=''; const steps=Math.round((mx-mn)/step); for(let i=0;i<=steps;i++){ const v=mn+step*i; g+=`<line class="gl" x1="${ml}" x2="${W-mr}" y1="${yv(v)}" y2="${yv(v)}"/><text x="${ml-6}" y="${yv(v)+4}" text-anchor="end">${fmt(v)}</text>`; }
+  if(mn<0) g+=`<line class="ax" x1="${ml}" x2="${W-mr}" y1="${yv(0)}" y2="${yv(0)}"/>`;
+  labels.forEach((l,i)=> g+=`<text x="${xv(i)}" y="${H-8}" text-anchor="middle">${esc(l)}</text>`);
+  let p=''; const ends=[];
+  series.forEach(s=>{ const pts=s.values.map((v,i)=>v==null?null:[xv(i),yv(v)]).filter(Boolean); if(!pts.length) return;
+    p+=`<polyline fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" points="${pts.map(q=>q.join(',')).join(' ')}"/>`;
+    s.values.forEach((v,i)=>{ if(v==null) return; p+=`<circle cx="${xv(i)}" cy="${yv(v)}" r="4.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2" data-tip="${esc(s.name)} · ${esc(labels[i])}: ${fmt(v)}"/>`; });
+    const lp=pts[pts.length-1]; ends.push({y:lp[1],x:lp[0],name:s.name,color:s.color}); });
+  ends.sort((a,b)=>a.y-b.y); for(let i=1;i<ends.length;i++) if(ends[i].y-ends[i-1].y<13) ends[i].y=ends[i-1].y+13;
+  ends.forEach(e=> p+=`<text x="${e.x+8}" y="${e.y+4}" style="fill:var(--ink2);font-family:var(--body);font-size:11px">${esc(e.name.length>11?e.name.slice(0,10)+'…':e.name)}</text>`);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${g}${p}</svg>`;
+}
+function legend(items){ return `<div class="legend">${items.map(i=>`<span><i style="background:${i.color}"></i>${esc(i.name)}</span>`).join('')}</div>`; }
+
+// ---------- MARKET BOARD ----------
+function viewBoard(){
+  const R = G.results;
+  if(!R.length){
+    return `<div class="stack" style="gap:16px"><div class="banner"><b>${EVENTS[1].title}.</b> ${EVENTS[1].text}</div>
+    <div class="kpis"><div class="kpi"><div class="l">Households in the market</div><div class="v">3.0M</div></div><div class="kpi"><div class="l">Own a modern purifier</div><div class="v">0%</div></div><div class="kpi"><div class="l">Category knowledge</div><div class="v">${pct(G.K)}</div></div><div class="kpi"><div class="l">Decisions in</div><div class="v">${submittedCount()}</div></div></div>
+    <div class="panel"><h3>The board fills in after Year 1 runs</h3><p class="ink2 small">Sales, shares, the shelf of competing products, adoption by segment and each company’s cash will appear here. Teams enter decisions on the Team desk; the facilitator runs the year.</p></div></div>`;
+  }
+  const r = R[R.length-1]; const teams = G.config.teams; const labels = R.map(x=>'Y'+x.year);
+  const sales = stackedBars(teams.map(t=>({name:t.name,color:col(t),values:R.map(x=>(x.teams[t.id].units||0)+(x.teams[t.id].unitsW||0))})), labels, v=>k(v));
+  const cash = lines(teams.map(t=>({name:t.name,color:col(t),values:[G.config.startCash, ...R.map(x=>x.teams[t.id].cash)]})), ['Start',...labels], v=>'₹'+Math.round(v));
+  const pen = stackedBars([{name:'Owners',color:'var(--aqua)',values:E.SEGS.map(s=>r.segs[s.id].pen*100)}], E.SEGS.map(s=>s.name.replace('Early ','E. ').replace('Late ','L. ')), v=>Math.round(v)+'%', 220);
+  const ranked = teams.slice().sort((a,b)=>(r.teams[b.id].cumProfit||0)-(r.teams[a.id].cumProfit||0));
+  const shelf = teams.filter(t=>r.teams[t.id].active).map(t=>{ const x=r.teams[t.id]; return `<tr><td><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="dot" style="background:${col(t)}"></span><b>${esc(t.name)}</b></span></td>${x.attrs.map(l=>`<td class="r num">${l}</td>`).join('')}<td class="r num">${rs(x.price)}${x.emi?' <span class="chip">EMI</span>':''}</td><td class="small">${E.MESSAGES[x.msg].label}</td><td class="small">${x.cov.map(c=>['–','online','dealers'][c]).join(' / ')}</td><td class="small">${x.waasLive?rs(x.waasFee)+'/mo':''}</td></tr>`; }).join('');
+  const news = driftNews(G.drift[r.year+1]);
+  return `<div class="stack" style="gap:16px">
+    <div class="spread"><div><div class="eyebrow">Category after Year ${r.year}</div><div class="stage" style="font-size:40px;color:var(--navy)">${r.stage}</div><p class="ink2 small">${STAGE_NOTE[r.stage]}</p></div>
+      ${!G.done?`<div class="banner" style="max-width:520px"><b>${EVENTS[G.year].title}.</b> ${EVENTS[G.year].text}</div>`:''}</div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Category sales Y${r.year} (units + subscribers)</div><div class="v">${k(r.totalUnits)}</div></div>
+      <div class="kpi"><div class="l">Growth vs. last year</div><div class="v">${r.growth==null?'—':(r.growth>=0?'+':'−')+Math.abs(r.growth*100).toFixed(0)+'%'}</div></div>
+      <div class="kpi"><div class="l">Households owning one</div><div class="v">${pct(r.cumAdoption)}</div></div>
+      <div class="kpi"><div class="l">Category knowledge</div><div class="v">${pct(r.K)}</div></div>
+    </div>
+    ${news?`<div class="banner warn small"><b>Market chatter.</b> ${news}</div>`:''}
+    <div class="grid g2">
+      <div class="panel stack"><h3>Category sales by company</h3>${legend(teams.map(t=>({name:t.name,color:col(t)})))}${sales}</div>
+      <div class="panel stack"><h3>Cash position</h3><p class="small muted">The investment cycle: cash dips before it climbs.</p>${cash}</div>
+    </div>
+    <div class="grid g2">
+      <div class="panel stack"><h3>Adoption by segment</h3><p class="small muted">Share of each segment that owns a purifier. Each group waits for the one before it.</p>${pen}</div>
+      <div class="panel stack"><h3>Leaderboard</h3><div class="scroll"><table><tr><th>Company</th><th class="r">Y${r.year} sales</th><th class="r">Share</th><th class="r">Profit Y${r.year}</th><th class="r">Cumulative</th><th class="r">Cash</th></tr>
+        ${ranked.map(t=>{ const x=r.teams[t.id]; return `<tr><td><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="dot" style="background:${col(t)}"></span>${esc(t.name)}</span></td><td class="r num">${x.active?k(x.units+x.unitsW):'—'}</td><td class="r num">${x.active?pct(x.share):'—'}</td><td class="r num">${x.active?cr(x.profit):'—'}</td><td class="r num"><b>${cr(x.cumProfit||0)}</b></td><td class="r num">${cr(x.cash)}</td></tr>`; }).join('')}</table></div></div>
+    </div>
+    <div class="panel stack"><h3>On the shelf in Year ${r.year}</h3><p class="small muted">Public information: anyone can buy a competitor’s purifier and look inside. Attribute levels 0–3.</p>
+      <div class="scroll"><table><tr><th>Company</th>${E.ATTRS.map(a=>`<th class="r">${a.name}</th>`).join('')}<th class="r">Price</th><th>Message</th><th>Metro / T2 / T3</th><th>WaaS</th></tr>${shelf}</table></div></div>
+  </div>`;
+}
+function driftNews(ch){
+  if(!ch || !ch.length) return '';
+  const by = {}; ch.forEach(c=>{ const key = c.attr+'|'+(c.to.t==='B'?'B':c.to.t); (by[key]=by[key]||[]).push(c); });
+  return Object.entries(by).map(([key,list])=>{ const a=E.ATTRS[+key.split('|')[0]].name.toLowerCase(); const t=key.split('|')[1];
+    const who = list.length>=3 ? 'many customers' : 'some customers';
+    return t==='B' ? `${who[0].toUpperCase()+who.slice(1)} now take ${a} for granted.` : t==='P' ? `${a[0].toUpperCase()+a.slice(1)} no longer surprises ${who}; they compare it.` : `${who[0].toUpperCase()+who.slice(1)} are starting to notice ${a}.`; }).join(' ');
+}
+function submittedCount(){ const act = G.config.teams.filter(t=>E.isActive(G,t)); const d=G.decisions[G.year]||{}; return act.filter(t=>d[t.id]&&d[t.id].submitted).length+' / '+act.length; }
+
+// ---------- FACILITATOR ----------
+function viewHost(){
+  const act = G.config.teams.filter(t=>E.isActive(G,t)); const d=G.decisions[G.year]||{};
+  const missing = act.filter(t=>!(d[t.id]&&d[t.id].submitted));
+  const conf = UI.confirm;
+  return `<div class="grid g2">
+    <div class="panel stack"><h3>${G.done?'Game complete':'Run Year '+G.year}</h3>
+      ${G.done?`<p class="ink2">All five years have been simulated.</p><button class="btn primary" data-tab="debrief">Open the debrief</button>`:`
+      <p class="ink2 small">Decisions submitted: <b>${submittedCount()}</b>.${missing.length?' Teams that haven’t submitted keep last year’s decisions'+(G.year===1?' (or the default product)':'')+': '+missing.map(t=>esc(t.name)).join(', ')+'.':''}</p>
+      ${conf==='run'?`<div class="confirm"><span>Run Year ${G.year}${missing.length?' with '+missing.length+' team(s) on autopilot':''}?</span><button class="btn primary" id="runYes">Run it</button><button class="btn" id="cancel">Cancel</button></div>`:`<button class="btn primary" id="run" style="padding:12px">Run Year ${G.year}</button>`}`}
+      ${SNAP.length?(conf==='undo'?`<div class="confirm"><span>Undo Year ${G.results.length} and reopen its decisions?</span><button class="btn danger" id="undoYes">Undo</button><button class="btn" id="cancel">Cancel</button></div>`:`<button class="btn" id="undo">Undo the last year</button>`):''}
+    </div>
+    <div class="panel stack"><h3>Teams this year</h3>
+      <table class="small"><tr><th>Company</th><th>Status</th><th class="r">Cash</th></tr>${G.config.teams.map(t=>`<tr><td><span class="row" style="gap:6px"><span class="dot" style="background:${col(t)}"></span>${esc(t.name)}</span></td><td>${!E.isActive(G,t)?'enters Y'+t.entry:(d[t.id]&&d[t.id].submitted)?'<span class="chip good">submitted</span>':'<span class="chip">open</span>'}</td><td class="r num">${cr(G.ts[t.id].cash)}</td></tr>`).join('')}</table>
+    </div>
+    <div class="panel stack"><h3>Back up or move the game</h3>
+      <p class="small ink2">The game is saved in this browser. To move it to another laptop, copy the code below and paste it there.</p>
+      <div class="row"><button class="btn" id="copy">Copy game code</button><button class="btn" id="showImp">Paste a game code</button></div>
+      <textarea id="code" readonly hidden></textarea>
+      <div id="imp" hidden class="stack"><textarea id="impText" placeholder="Paste the game code here"></textarea><button class="btn primary" id="doImp">Load this game</button></div>
+    </div>
+    <div class="panel stack"><h3>Start over</h3><p class="small ink2">Deletes this game and goes back to the team setup.</p>
+      ${conf==='reset'?`<div class="confirm"><span>Delete the current game?</span><button class="btn danger" id="resetYes">Delete and restart</button><button class="btn" id="cancel">Cancel</button></div>`:`<button class="btn danger" id="reset">New game</button>`}</div>
+  </div>`;
+}
+function bindHost(){
+  const on = (id,fn) => { const el=$('#'+id); if(el) el.onclick=fn; };
+  on('run',()=>{ UI.confirm='run'; render(); });
+  on('undo',()=>{ UI.confirm='undo'; render(); });
+  on('reset',()=>{ UI.confirm='reset'; render(); });
+  on('cancel',()=>{ UI.confirm=null; render(); });
+  on('runYes',()=>{ SNAP.push(JSON.stringify(G)); if(SNAP.length>6) SNAP.shift(); const act=G.config.teams.filter(t=>E.isActive(G,t)); act.forEach(t=>getDec(t.id)); G = E.runYear(G); UI.confirm=null; UI.tab='board'; UI.deskOpen=false; save(); render(); window.scrollTo(0,0); toast('Year '+G.results.length+' simulated'); });
+  on('undoYes',()=>{ G = JSON.parse(SNAP.pop()); UI.confirm=null; save(); render(); toast('Last year undone'); });
+  on('resetYes',()=>{ G=null; SNAP=[]; UI={tab:'setup',team:null,deskOpen:false,confirm:null,setup:null}; try{localStorage.removeItem(KEY);}catch(e){} render(); });
+  on('copy',()=>{ const ta=$('#code'); const code=btoa(unescape(encodeURIComponent(JSON.stringify(G)))); ta.value=code; ta.hidden=false;
+    try{ navigator.clipboard.writeText(code).then(()=>toast('Game code copied'),()=>{ ta.select(); toast('Select and copy the code'); }); }catch(e){ ta.select(); } });
+  on('showImp',()=>{ $('#imp').hidden=false; });
+  on('doImp',()=>{ try{ const g=JSON.parse(decodeURIComponent(escape(atob($('#impText').value.trim())))); if(!g.config||!g.ts) throw 0; G=g; SNAP=[]; save(); UI.tab='board'; render(); toast('Game loaded'); }catch(e){ toast('That code isn’t a valid game'); } });
+}
+
+// ---------- DEBRIEF ----------
+function viewDebrief(){
+  const R = G.results;
+  if(R.length<2) return `<div class="panel privacy"><h2>The debrief opens after Year 2</h2><p class="ink2" style="max-width:52ch">It brings together the life cycle, cash, the 4 As, the Kano drift and each portfolio. It’s most useful after Year 5, but you can peek at any time.</p></div>`;
+  const teams = G.config.teams; const labels = R.map(x=>'Y'+x.year); const last = R[R.length-1];
+  // PLC
+  const plc = lines([{name:'Category sales',color:'var(--navy)',values:R.map(x=>x.totalUnits)}], R.map(x=>'Y'+x.year+' '+x.stage.slice(0,5)+'.'), v=>k(v), 240);
+  const profitCurve = lines(teams.map(t=>({name:t.name,color:col(t),values:R.map(x=>x.teams[t.id].active?x.teams[t.id].profit:null)})), labels, v=>'₹'+Math.round(v), 240);
+  // 4A table
+  const faRows = teams.map(t=>{ return `<tr><td><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="dot" style="background:${col(t)}"></span>${esc(t.name)}</span></td>${R.map(x=>{ const r=x.teams[t.id]; if(!r.active) return '<td class="muted">—</td>'; const e=Object.entries(r.fourA).sort((a,b)=>a[1]-b[1])[0]; return `<td><span class="chip ${e[1]<40?'bad':e[1]<60?'warn':''}">${e[0][0].toUpperCase()+e[0].slice(1,6)}. ${e[1].toFixed(0)}</span></td>`; }).join('')}</tr>`; }).join('');
+  // Kano evolution
+  const kf = G.kanoHistory[1], kl = G.kanoHistory[Math.max(...Object.keys(G.kanoHistory).map(Number))];
+  const kcell = c => `<span class="kcell k-${c.t}" style="display:block">${c.t==='B'?'B≥'+c.req:c.t}</span>`;
+  const kano = `<div class="scroll"><table class="small"><tr><th>Attribute</th>${E.SEGS.map(s=>`<th>${s.name}</th>`).join('')}</tr>${E.ATTRS.map((a,i)=>`<tr><td><b>${a.name}</b></td>${E.SEGS.map(s=>{ const a0=kf[s.id][i], a1=kl[s.id][i]; const same=JSON.stringify(a0)===JSON.stringify(a1); return `<td><div class="row" style="gap:4px;flex-wrap:nowrap">${kcell(a0)}${same?'':'<span class="muted">→</span>'+kcell(a1)}</div></td>`; }).join('')}</tr>`).join('')}</table></div>`;
+  // Portfolio matrix (last year)
+  const items = {Absorber:[],Strategic:[],Dog:[],Contributor:[]};
+  teams.forEach(t=>{ const r=last.teams[t.id]; if(!r.active) return; items[r.products.p1.cls].push(`<span class="pchip"><span class="dot" style="background:${col(t)}"></span>${esc(t.name)} · purifier</span>`); if(r.products.waas) items[r.products.waas.cls].push(`<span class="pchip"><span class="dot" style="background:${col(t)}"></span>${esc(t.name)} · WaaS</span>`); });
+  const mq = (n,cls,stage) => `<div class="mq ${cls}"><span class="q">${n} · ${stage}</span><div class="row" style="gap:4px">${items[n].join('')||'<span class="muted small">—</span>'}</div></div>`;
+  const matrix = `<div class="matrix"><div class="ylab">MARKET ATTRACTIVENESS · HIGH</div>${mq('Absorber','hi','introduction')}${mq('Strategic','hi','growth')}<div class="ylab">LOW</div>${mq('Dog','lo','late maturity, decline')}${mq('Contributor','lo','early maturity')}<div></div><div class="xlab">PROFITABILITY · WEAK</div><div class="xlab">STRONG</div></div>`;
+  // free riding on education
+  const edu = teams.map(t=>{ const spent = R.reduce((a,x)=>a+(x.teams[t.id].active?x.teams[t.id].edu:0),0); const units = R.reduce((a,x)=>a+(x.teams[t.id].units||0)+(x.teams[t.id].unitsW||0),0); return {t,spent,units}; });
+  const eduTot = edu.reduce((a,e)=>a+e.spent,0)||1, uTot = edu.reduce((a,e)=>a+e.units,0)||1;
+  // stigma / credibility audit
+  const audit = [];
+  teams.forEach(t=>R.forEach(x=>{ const r=x.teams[t.id]; if(!r.active) return;
+    if(r.msg==='price') audit.push(`<li><b>${esc(t.name)}</b>, Y${x.year}: “The most affordable purifier”. Early adopters and the early majority read it as “the poor family’s purifier” and penalised it.</li>`);
+    else if(r.price<7000) audit.push(`<li><b>${esc(t.name)}</b>, Y${x.year}: price ${rs(r.price)} looked cheap to aspirational buyers.</li>`);
+    if(!E.credible(r.msg, r.attrs, r.price)) audit.push(`<li><b>${esc(t.name)}</b>, Y${x.year}: message “${E.MESSAGES[r.msg].label}” not backed by the product, credibility penalty.</li>`); }));
+  return `<div class="stack" style="gap:20px">
+    <div><div class="eyebrow">Debrief · ${G.done?'final':'after Year '+last.year}</div><h1>What the market did to your plans</h1></div>
+    <div class="grid g2">
+      <div class="panel stack"><h3>1 · The product life cycle you built</h3><p class="small ink2">Nobody drew this curve. It came from adopter segments waiting for each other, from category knowledge, imitation and, in Years 4–5, substitutes and saturation.</p>${plc}</div>
+      <div class="panel stack"><h3>2 · Profit along the cycle</h3><p class="small ink2">Losses at introduction, profits in growth, pressure at maturity. Compare with the slide on profitability and the cash-flow cycle.</p>${legend(teams.map(t=>({name:t.name,color:col(t)})))}${profitCurve}</div>
+    </div>
+    <div class="panel stack"><h3>3 · The bottleneck A, year by year</h3><p class="small ink2">The weakest of acceptability, affordability, accessibility and awareness for each company. A launch is only as strong as its weakest A.</p>
+      <div class="scroll"><table><tr><th>Company</th>${labels.map(l=>`<th>${l}</th>`).join('')}</tr>${faRows}</table></div></div>
+    <div class="panel stack"><h3>4 · Kano drift: what customers came to take for granted</h3><p class="small ink2">Year 1 classification → classification now. Attributes move from excitement to performance to basic as competitors make them common. The minimum level of basic factors rises too.</p>
+      <div class="legend"><span><i class="k-B"></i>Basic (minimum level)</span><span><i class="k-P"></i>Performance</span><span><i class="k-E"></i>Excitement</span><span><i class="k-I"></i>Indifferent</span></div>${kano}</div>
+    <div class="grid g2">
+      <div class="panel stack"><h3>5 · Portfolio in Year ${last.year}</h3><p class="small ink2">Attractiveness: product still young (≤1 year) or growing ≥15%. Profitability: product profit after its share of costs.</p>${matrix}</div>
+      <div class="panel stack"><h3>6 · Who paid to educate the market?</h3><p class="small ink2">Category education is a public good: pioneers pay, imitators collect.</p>
+        <table><tr><th>Company</th><th class="r">Share of education spend</th><th class="r">Share of all sales</th></tr>${edu.map(e=>`<tr><td><span class="row" style="gap:6px;flex-wrap:nowrap"><span class="dot" style="background:${col(e.t)}"></span>${esc(e.t.name)}</span></td><td class="r num">${pct(e.spent/eduTot)}</td><td class="r num">${pct(e.units/uTot)}</td></tr>`).join('')}</table></div>
+    </div>
+    <div class="panel stack"><h3>7 · Hidden rules, now revealed</h3>
+      <ul class="small ink2" style="margin:0;padding-left:18px;display:grid;gap:6px">
+        <li><b>Status matters.</b> Aspirational segments (early adopters, early majority) penalise a product positioned as the cheapest, and to a lesser degree any price under ${rs(7000)}.</li>
+        <li><b>Basic factors don’t sell, they only lose.</b> Above the minimum purification level, extra purification earned nothing. Below it, the product was rejected.</li>
+        <li><b>Diffusion.</b> The early majority moved only once about 30% of early adopters owned a purifier; the late majority waited for the early majority.</li>
+        <li><b>Imitation is cheaper.</b> From Year 2, any feature level already on the shelf cost half to develop.</li>
+      </ul>
+      ${audit.length?`<details><summary>Where these rules hit your companies (${audit.length})</summary><ul class="small ink2" style="padding-left:18px;display:grid;gap:4px">${audit.join('')}</ul></details>`:''}</div>
+    <div class="panel stack" style="border-color:var(--navy)"><h3>Bridge to the TATA Nano case</h3>
+      <ol class="ink2" style="margin:0;padding-left:20px;display:grid;gap:6px">
+        <li>Did any team try to sell “to everyone”? What happened to it in each segment?</li>
+        <li>Which A was the bottleneck for the best and the worst company? Which would you expect for the Nano?</li>
+        <li>Which team’s STP held together: segment, message and product all pointing the same way?</li>
+        <li>Pick one company and list its points of parity and points of difference. Which differences did customers actually value?</li>
+      </ol></div>
+  </div>`;
+}
+
+// ---------- events ----------
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-tab]'); if(b && G){ UI.tab=b.dataset.tab; UI.confirm=null; if(UI.tab!=='desk') UI.deskOpen=false; save(); render(); window.scrollTo(0,0); } });
+const tip = $('#tip');
+document.addEventListener('mousemove', e=>{ const t=e.target.closest('[data-tip]'); if(!t){ tip.hidden=true; return; } tip.textContent=t.dataset.tip; tip.hidden=false; const x=Math.min(e.clientX+12, innerWidth-250); tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px'; });
+
+load(); render();
+})();
+</script>
+
+</body></html>
