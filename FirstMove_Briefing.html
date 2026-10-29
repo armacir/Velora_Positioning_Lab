@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>First Move · Briefing</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{color-scheme:light} body{margin:0;font-size:14px} [hidden]{display:none!important}
+
+/* Layout: a facilitator console — slim year rail on top, one working surface below; projected board uses big numbers, the team desk is a two-column report | decision sheet */
+:root{
+  --bg:#f5f7f9; --panel:#ffffff; --ink:#0f1d2e; --ink2:#4a5868; --muted:#7a8796; --line:#dde3ea; --line2:#eef2f6;
+  --navy:#0b2e5c; --navy-ink:#ffffff; --aqua:#0e8fa3; --aqua-soft:#e3f3f5;
+  --good:#1e7d4a; --good-bg:#e5f4ec; --warn:#a96400; --warn-bg:#fdf1dc; --bad:#b3261e; --bad-bg:#fbe7e5;
+  --t1:#2a78d6; --t2:#eb6834; --t3:#1baf7a; --t4:#eda100; --t5:#e87ba4; --t6:#008300; --t7:#6250d6; --t8:#e34948;
+  --k-B:#5b6b7c; --k-P:#2a78d6; --k-E:#7a4fc9; --k-I:#b9c2cc;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c141d; --panel:#131e2a; --ink:#e8eef4; --ink2:#b3c0cd; --muted:#8494a5; --line:#24333f; --line2:#1a2733;
+  --navy:#7fb2f0; --navy-ink:#0c141d; --aqua:#3cc0d2; --aqua-soft:#12303a;
+  --good:#5cc98a; --good-bg:#13301f; --warn:#f0b54a; --warn-bg:#33270f; --bad:#f08a80; --bad-bg:#3a1714;
+  --t1:#3987e5; --t2:#d95926; --t3:#199e70; --t4:#c98500; --t5:#d55181; --t6:#008300; --t7:#9085e9; --t8:#e66767;
+  --k-B:#8a9bad; --k-P:#5a9ff0; --k-E:#a688e8; --k-I:#3a4856; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c141d; --panel:#131e2a; --ink:#e8eef4; --ink2:#b3c0cd; --muted:#8494a5; --line:#24333f; --line2:#1a2733;
+  --navy:#7fb2f0; --navy-ink:#0c141d; --aqua:#3cc0d2; --aqua-soft:#12303a;
+  --good:#5cc98a; --good-bg:#13301f; --warn:#f0b54a; --warn-bg:#33270f; --bad:#f08a80; --bad-bg:#3a1714;
+  --t1:#3987e5; --t2:#d95926; --t3:#199e70; --t4:#c98500; --t5:#d55181; --t6:#008300; --t7:#9085e9; --t8:#e66767;
+  --k-B:#8a9bad; --k-P:#5a9ff0; --k-E:#a688e8; --k-I:#3a4856; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.05}
+h2{font-size:24px;font-weight:750;line-height:1.15}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--navy);color:var(--navy-ink)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding-block:10px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-family:var(--display);font-stretch:75%;font-weight:800;font-size:24px;letter-spacing:.01em;text-transform:uppercase}
+.brand span{font-family:var(--mono);font-size:11px;opacity:.75;letter-spacing:.08em}
+.rail{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.yr{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:3px;border:1px solid color-mix(in srgb,var(--navy-ink) 30%,transparent);opacity:.6}
+.yr.done{opacity:.85}
+.yr.now{opacity:1;background:var(--navy-ink);color:var(--navy);font-weight:600}
+.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+.tab{background:none;border:0;color:var(--navy-ink);opacity:.72;padding:6px 10px;border-radius:4px;font-weight:500;font-size:14px}
+.tab:hover{opacity:1}
+.tab[aria-current="true"]{opacity:1;background:color-mix(in srgb,var(--navy-ink) 16%,transparent)}
+
+main{padding-top:28px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;min-width:0}
+.panel>h3{margin-bottom:10px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.muted{color:var(--muted)} .ink2{color:var(--ink2)}
+.small{font-size:13px}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:6px;font-weight:500}
+.btn:hover{border-color:var(--ink2)}
+.btn.primary{background:var(--navy);color:var(--navy-ink);border-color:var(--navy);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.aqua{background:var(--aqua);color:#fff;border-color:var(--aqua);font-weight:600}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,var(--line))}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--line2);color:var(--ink2);white-space:nowrap}
+.chip.good{background:var(--good-bg);color:var(--good)} .chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.bad{background:var(--bad-bg);color:var(--bad)} .chip.aqua{background:var(--aqua-soft);color:var(--aqua)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.r,th.r{text-align:right}
+.scroll{overflow-x:auto}
+.banner{border-left:4px solid var(--aqua);background:var(--aqua-soft);padding:12px 16px;border-radius:0 6px 6px 0}
+.banner.warn{border-color:var(--warn);background:var(--warn-bg)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kpi .v{font-family:var(--display);font-stretch:80%;font-weight:750;font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12px;color:var(--muted)}
+.stage{font-family:var(--display);font-stretch:75%;text-transform:uppercase;font-weight:800;letter-spacing:.04em}
+
+/* setup */
+.hero{padding-block:12px 24px;display:grid;gap:14px;max-width:760px}
+.hero p{font-size:17px;color:var(--ink2);max-width:62ch}
+.team-edit{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+input[type=text],input[type=number],select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0}
+input[type=range]{width:100%;accent-color:var(--navy)}
+label.cb{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)}
+
+/* desk */
+.teambar{display:flex;gap:8px;flex-wrap:wrap}
+.tpick{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel);font-weight:600}
+.tpick[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tpick .st{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--muted)}
+.tpick .st.ok{color:var(--good)}
+.desk{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:start}
+@media (max-width:900px){.desk{grid-template-columns:1fr}}
+.dec-sec{border-top:1px solid var(--line2);padding-top:14px;display:grid;gap:10px}
+.dec-sec:first-child{border-top:0;padding-top:0}
+.dec-sec h4{margin:0;font-family:var(--display);font-stretch:85%;font-size:16px;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.dec-sec h4 .tag{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--aqua);letter-spacing:.06em;text-transform:uppercase}
+.attr-row{min-width:0;display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,2.6fr);gap:10px;align-items:center}
+@media (max-width:560px){.attr-row{grid-template-columns:1fr}}
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));min-width:0;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{min-width:0;overflow-wrap:anywhere;border:0;border-left:1px solid var(--line);background:var(--panel);padding:6px 4px;font-size:12px;line-height:1.25;min-height:40px}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--navy-ink);font-weight:600}
+.seg.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg.c4w{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:560px){.seg.c4w{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.attr-name b{display:block;font-size:14px}
+.attr-name span{font-size:12px;color:var(--muted)}
+.cur{font-family:var(--mono);font-size:10px;color:var(--aqua)}
+.slider{display:grid;grid-template-columns:minmax(110px,1fr) 2fr auto;gap:12px;align-items:center}
+.slider output{font-family:var(--mono);font-size:14px;min-width:84px;text-align:right}
+@media (max-width:560px){.slider{grid-template-columns:1fr auto}.slider input{grid-column:1/-1;grid-row:2}}
+.preview{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px)}
+.ledger{display:grid;grid-template-columns:1fr auto;gap:4px 16px;font-size:14px}
+.ledger .tot{border-top:1px solid var(--line);padding-top:6px;font-weight:600}
+.privacy{display:grid;place-items:center;text-align:center;padding:48px 16px;gap:12px}
+
+/* 4A bars */
+.fa{display:grid;gap:8px}
+.fa-row{display:grid;grid-template-columns:110px 1fr 40px;gap:10px;align-items:center;font-size:13px}
+.fa-track{height:10px;background:var(--line2);border-radius:5px;overflow:hidden}
+.fa-fill{height:100%;background:var(--aqua);border-radius:0 4px 4px 0}
+.fa-row.low .fa-fill{background:var(--warn)}
+.fa-row.low b{color:var(--warn)}
+
+/* kano grid */
+.kgrid{display:grid;gap:3px;font-size:12px}
+.kcell{padding:4px 6px;border-radius:3px;text-align:center;font-weight:600;color:#fff}
+.k-B{background:var(--k-B)} .k-P{background:var(--k-P)} .k-E{background:var(--k-E)} .k-I{background:var(--k-I);color:var(--ink2)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
+.legend i{width:12px;height:12px;border-radius:2px;display:inline-block;vertical-align:-2px;margin-right:4px}
+
+/* charts */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--muted);font-family:var(--mono);font-size:11px}
+.chart .gl{stroke:var(--line2)}
+.chart .ax{stroke:var(--line)}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:5px;z-index:50;max-width:240px;line-height:1.35}
+.matrix{display:grid;grid-template-columns:28px 1fr 1fr;grid-template-rows:1fr 1fr 24px;gap:4px;min-height:240px}
+.mq{border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:4px;font-size:12px}
+.mq .q{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mq.hi{background:var(--aqua-soft)} .mq.lo{background:var(--line2)}
+.ylab{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:.06em}
+.xlab{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;letter-spacing:.06em}
+.pchip{display:inline-flex;gap:5px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:2px 6px;font-weight:600}
+textarea{width:100%;min-height:120px;font-family:var(--mono);font-size:11px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;font-weight:500;z-index:60}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:var(--warn-bg);border-radius:6px}
+details summary{cursor:pointer;font-weight:600}
+@media (prefers-reduced-motion: no-preference){.fa-fill{transition:width .4s ease}}
+
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><div class="brand"><b>First Move</b><span>PRODUCT LAUNCH SIMULATION · BRIEFING</span></div></div></header>
+<main class="wrap" style="padding-top:24px"><div class="stack" style="gap:20px">
+  <div class="banner"><b>Year 1 — The category is born.</b> Nobody in Tier 1–3 India buys a smart purifier yet. Most households boil water or use a basic carbon filter. You design the product and launch it.</div>
+  <section class="grid g2">
+    <div class="stack">
+      <div class="eyebrow">The case</div>
+      <h2>Smart water purifiers for India’s next 100 cities</h2>
+      <p class="ink2">About 3 million households in Tier 1, 2 and 3 cities could afford a home purifier, but almost none owns a modern one. Water quality is a daily worry; boiling is the default. Your company has the technology. You have five years to build the category and a profitable business inside it.</p>
+      <p class="ink2">Each year your team decides <b>what the product is</b> (six attributes), <b>who it is for</b> and <b>what you say</b> (positioning), <b>the price</b> and whether to offer EMI instalments, <b>where it is sold</b> (online only, or dealers too, by city tier) and <b>how much you spend</b> on brand advertising and on category education (water-testing camps, demos).</p>
+      <p class="ink2">You win on <b>cumulative profit</b> after Year 5. Running out of cash is allowed but you pay 12% interest on the overdraft.</p>
+    </div>
+    <div class="panel stack">
+      <h3>Rules of thumb</h3>
+      <ul class="small ink2" style="margin:0;padding-left:18px;display:grid;gap:6px">
+        <li>Customers buy benefits, not features. A feature counts only if your target links it to something they want.</li>
+        <li>Brand advertising makes people know <i>your</i> brand. Category education makes people understand <i>why</i> to buy a purifier at all, and it helps every competitor.</li>
+        <li>People buy when people like them have already bought. Some segments won’t move until the segment before them has adopted.</li>
+        <li>Your positioning message must be backed by the product. Claims you can’t support cost you credibility.</li>
+        <li>What surprises customers today they will expect tomorrow.</li>
+        <li>Market research is for sale on the Team desk: a Kano study per segment (₹0.5 cr) and a market report (₹0.4 cr).</li>
+      </ul>
+    </div>
+  </section>
+  <section class="stack">
+    <div class="eyebrow">Customer value chain</div>
+    <h2>From what the product is, to what it does, to what customers get</h2>
+    <div class="panel scroll"><table><tbody><tr><th>Characteristic (levels 0 → 3)</th><th>Performance</th><th>Benefit</th><th class="r">Unit cost added</th></tr><tr><td><b>Purification</b><br><span class="small muted">Carbon filter → UV → RO → RO + UV + UF</span></td><td>Removes bacteria, salts and heavy metals</td><td>Family health</td><td class="r num small">+₹600 … +₹2,300</td></tr><tr><td><b>Mineral &amp; taste</b><br><span class="small muted">None → TDS control → Mineral cartridge → Adaptive mineraliser</span></td><td>Keeps healthy minerals, water tastes good</td><td>Health &amp; enjoyment</td><td class="r num small">+₹300 … +₹1,100</td></tr><tr><td><b>Filter life</b><br><span class="small muted">6 months → 12 months → 18 months → 24 months</span></td><td>Fewer filter changes</td><td>Lower running cost</td><td class="r num small">+₹250 … +₹1,000</td></tr><tr><td><b>Water saving</b><br><span class="small muted">70% wasted → 50% wasted → 35% wasted → 20% wasted</span></td><td>Less water rejected by the RO stage</td><td>Saves water &amp; money</td><td class="r num small">+₹300 … +₹1,200</td></tr><tr><td><b>Smart features</b><br><span class="small muted">None → LED alerts → App monitoring → App + auto filter reorder</span></td><td>Shows water quality, warns before filters expire</td><td>Convenience &amp; modern image</td><td class="r num small">+₹200 … +₹1,400</td></tr><tr><td><b>Design</b><br><span class="small muted">Plain box → Clean → Premium → Designer glass</span></td><td>Looks good in the kitchen</td><td>Status &amp; pride</td><td class="r num small">+₹250 … +₹1,000</td></tr>
+      <tr><td colspan="4" class="small muted">Base unit cost ₹3,500. Developing a level costs ₹1 / 2 / 3.5 cr for levels 1 / 2 / 3 (one-off). Dealers and online platforms keep 22% of the shelf price.</td></tr></tbody></table></div>
+  </section>
+  <section class="stack">
+    <div class="eyebrow">Who is out there</div>
+    <h2>Five kinds of households</h2>
+    <div class="grid g3"><div class="panel stack" style="gap:6px">
+     <div class="spread"><h3>Innovators</h3><span class="eyebrow num">2.5% · 75.0k HH</span></div>
+     <p class="small ink2">Tech-curious urban professionals. Buy early, tolerate risk, want to be first.</p>
+     <p class="small muted">Live in: Metros 60% · Tier 2 30% · Tier 3 10%</p></div><div class="panel stack" style="gap:6px">
+     <div class="spread"><h3>Early adopters</h3><span class="eyebrow num">13.5% · 405k HH</span></div>
+     <p class="small ink2">Aspirational upper-middle-class families. Opinion leaders; image matters to them.</p>
+     <p class="small muted">Live in: Metros 50% · Tier 2 35% · Tier 3 15%</p></div><div class="panel stack" style="gap:6px">
+     <div class="spread"><h3>Early majority</h3><span class="eyebrow num">34.0% · 1.02M HH</span></div>
+     <p class="small ink2">Middle-class families. Careful buyers who wait to see what neighbours buy.</p>
+     <p class="small muted">Live in: Metros 30% · Tier 2 45% · Tier 3 25%</p></div><div class="panel stack" style="gap:6px">
+     <div class="spread"><h3>Late majority</h3><span class="eyebrow num">34.0% · 1.02M HH</span></div>
+     <p class="small ink2">Budget-conscious households. Buy once the product is proven and easy to pay for.</p>
+     <p class="small muted">Live in: Metros 15% · Tier 2 40% · Tier 3 45%</p></div><div class="panel stack" style="gap:6px">
+     <div class="spread"><h3>Laggards</h3><span class="eyebrow num">16.0% · 480k HH</span></div>
+     <p class="small ink2">Traditional households, mostly in small towns. Boil water today; hard to convince.</p>
+     <p class="small muted">Live in: Metros 5% · Tier 2 25% · Tier 3 70%</p></div></div>
+  </section></div></main>
+</body>
+</html>
